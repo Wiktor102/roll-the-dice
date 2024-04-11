@@ -26,19 +26,21 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            val homeTab = TabBarItem(
+            val charactersTab = TabBarItem(
                 title = "Postacie",
+                routeName = "characters",
                 selectedIcon = Icons.Filled.People,
                 unselectedIcon = Icons.Outlined.People
             )
 
             val alertsTab = TabBarItem(
                 title = "Kostka",
+                routeName = "dice",
                 selectedIcon = Icons.Filled.Casino,
-                unselectedIcon = Icons.Outlined.Casino
+                unselectedIcon = Icons.Outlined.Casino,
             )
 
-            val tabBarItems = listOf(homeTab, alertsTab)
+            val tabBarItems = listOf(charactersTab, alertsTab)
             val navController = rememberNavController()
 
             AppTheme {
@@ -48,18 +50,16 @@ class MainActivity : ComponentActivity() {
                 ) {
                     CompositionLocalProvider(LocalNavController provides navController) {
                         Scaffold(
-                            topBar = { TopAppBar(title = { Text("Roll The Dice") }) },
                             bottomBar = { BottomNavigationBar(navItems = tabBarItems) }
                         ) {
                             NavHost(
                                 navController = navController,
-                                startDestination = homeTab.title,
+                                startDestination = charactersTab.routeName,
                                 Modifier.padding(it)
                             ) {
-                                composable(homeTab.title) {
-                                    Text(homeTab.title)
-                                }
-                                composable(alertsTab.title) {
+                                composable(charactersTab.routeName) { CharactersView() }
+                                composable("${charactersTab.routeName}/create") { NewCharacterView() }
+                                composable(alertsTab.routeName) {
                                     Text(alertsTab.title)
                                 }
                             }

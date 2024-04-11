@@ -21,7 +21,8 @@ data class TabBarItem(
     val title: String,
     val selectedIcon: ImageVector,
     val unselectedIcon: ImageVector,
-    val badgeAmount: Int? = null
+    val routeName: String,
+    val badgeAmount: Int? = null,
 )
 
 val LocalNavController = compositionLocalOf<NavHostController> { error("No NavController found!") }
@@ -39,7 +40,7 @@ fun BottomNavigationBar(navItems: List<TabBarItem>) {
                 selected = selectedTabIndex == index,
                 onClick = {
                     selectedTabIndex = index
-                    nav.navigate(tabBarItem.title)
+                    nav.navigate(tabBarItem.routeName)
                 },
                 icon = {
                     TabBarIconView(
