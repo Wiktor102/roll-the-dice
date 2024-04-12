@@ -13,11 +13,14 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
 import com.example.rollthedice.ui.theme.AppTheme
 
@@ -33,14 +36,14 @@ class MainActivity : ComponentActivity() {
                 unselectedIcon = Icons.Outlined.People
             )
 
-            val alertsTab = TabBarItem(
+            val diceTab = TabBarItem(
                 title = "Kostka",
                 routeName = "dice",
                 selectedIcon = Icons.Filled.Casino,
                 unselectedIcon = Icons.Outlined.Casino,
             )
 
-            val tabBarItems = listOf(charactersTab, alertsTab)
+            val tabBarItems = listOf(charactersTab, diceTab)
             val navController = rememberNavController()
 
             AppTheme {
@@ -49,19 +52,24 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     CompositionLocalProvider(LocalNavController provides navController) {
+                        val navBackStackEntry by navController.currentBackStackEntryAsState()
+                        val currentDestination = navBackStackEntry?.destination
+                        val showBn = currentDestination?.hierarchy?.any { listOf(charactersTab.routeName, diceTab.routeName).contains(it.route) } == true;
                         Scaffold(
-                            bottomBar = { BottomNavigationBar(navItems = tabBarItems) }
+                            bottomBar = { if (showBn) BottomNavigationBar(navItems = tabBarItems) }
                         ) {
                             NavHost(
                                 navController = navController,
-                                startDestination = charactersTab.routeName,
+                                startDestination = "main",
                                 Modifier.padding(it)
                             ) {
-                                composable(charactersTab.routeName) { CharactersView() }
-                                composable("${charactersTab.routeName}/create") { NewCharacterView() }
-                                composable(alertsTab.routeName) {
-                                    Text(alertsTab.title)
+                                navigation(startDestination = charactersTab.routeName, route = "main") {
+                                    composable(charactersTab.routeName) { CharactersView() }
+                                    composable(diceTab.routeName) {
+                                        Text(diceTab.title)
+                                    }
                                 }
+                                composable("${charactersTab.routeName}/create") { NewCharacterView() }
                             }
                         }
                     }

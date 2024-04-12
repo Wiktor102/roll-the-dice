@@ -1,6 +1,7 @@
 package com.example.rollthedice
 
 
+import androidx.annotation.StringRes
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -15,7 +16,10 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.navigation.NavDestination.Companion.hierarchy
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.currentBackStackEntryAsState
 
 data class TabBarItem(
     val title: String,
@@ -35,12 +39,21 @@ fun BottomNavigationBar(navItems: List<TabBarItem>) {
     }
 
     NavigationBar {
+        val navBackStackEntry by nav.currentBackStackEntryAsState()
+        val currentDestination = navBackStackEntry?.destination
         navItems.forEachIndexed { index, tabBarItem ->
             NavigationBarItem(
-                selected = selectedTabIndex == index,
+                selected = currentDestination?.hierarchy?.any { it.route == tabBarItem.routeName } == true,
                 onClick = {
                     selectedTabIndex = index
-                    nav.navigate(tabBarItem.routeName)
+                    nav.navigate(tabBarItem.routeName) {
+                        popUpTo(nav.graph.findStartDestination().id) {
+                            saveState = true
+                        }
+
+                        launchSingleTop = true
+                        restoreState = true
+                    }
                 },
                 icon = {
                     TabBarIconView(
