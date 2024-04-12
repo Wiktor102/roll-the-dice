@@ -1,10 +1,19 @@
 package com.example.rollthedice
 
+import android.content.Context
+import android.util.Log
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelStoreOwner
+import androidx.lifecycle.get
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+
 enum class CharacterRace(private val typeName: String) {
     HUMAN("Człowiek"),
     DWARF("Krasnolód"),
     ELF("Elf"),
-    HALFLING("Niziołek "),
+    HALFLING("Niziołek"),
     GNOME("Gnom"),
     HALFORC("Półork"),
     DRAGONBORN("Drakonid"),
@@ -47,8 +56,38 @@ enum class CharacterAlignment(private val typeName: String) {
     }
 }
 
-//data class Character (val name: String, val type: CharacterType, var health: Int);
-//
-//class CharactersViewModel: ViewModel() {
-//    private val characters =
-//}
+data class Character(
+    val name: String,
+    val race: CharacterRace,
+    val characterClass: CharacterClass,
+    val alignment: CharacterAlignment,
+    val health: Int
+);
+
+class CharactersViewModel : ViewModel() {
+    private val _characters = MutableStateFlow<List<Character>>(emptyList());
+    val characters: StateFlow<List<Character>> = _characters;
+
+    fun addCharacter(newCharacter: Character) {
+        val updatedList = _characters.value.toMutableList()
+        updatedList.add(newCharacter)
+        _characters.value = updatedList
+    }
+
+    fun updateCharacterHealth(characterName: String, newHealth: Int) {
+        val updatedList = _characters.value.toMutableList()
+        val productIndex = updatedList.indexOfFirst { it.name == characterName }
+        if (productIndex != -1) {
+            updatedList[productIndex] = updatedList[productIndex].copy(health = newHealth)
+            _characters.value = updatedList
+        }
+    }
+
+    companion object {
+        fun get(context: Context): CharactersViewModel {
+            val viewModelStoreOwner = context as ViewModelStoreOwner;
+            val quotesModel = ViewModelProvider(viewModelStoreOwner).get<CharactersViewModel>();
+            return quotesModel;
+        }
+    }
+}

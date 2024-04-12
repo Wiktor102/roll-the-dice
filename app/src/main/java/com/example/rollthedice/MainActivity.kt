@@ -16,6 +16,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -45,6 +46,7 @@ class MainActivity : ComponentActivity() {
 
             val tabBarItems = listOf(charactersTab, diceTab)
             val navController = rememberNavController()
+            val charactersViewModel: CharactersViewModel = viewModel()
 
             AppTheme {
                 Surface(
@@ -64,7 +66,7 @@ class MainActivity : ComponentActivity() {
                                 Modifier.padding(it)
                             ) {
                                 navigation(startDestination = charactersTab.routeName, route = "main") {
-                                    composable(charactersTab.routeName) { CharactersView() }
+                                    composable(charactersTab.routeName) { CharactersListView() }
                                     composable(diceTab.routeName) {
                                         Text(diceTab.title)
                                     }
