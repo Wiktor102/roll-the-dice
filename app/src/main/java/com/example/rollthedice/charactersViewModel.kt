@@ -68,6 +68,12 @@ class CharactersViewModel : ViewModel() {
     private val _characters = MutableStateFlow<List<Character>>(emptyList());
     val characters: StateFlow<List<Character>> = _characters;
 
+    fun getCharacter(name: String): StateFlow<Character?> {
+        return _characters.mapState {items ->
+            items.find {it.name == name}
+        };
+    }
+
     fun addCharacter(newCharacter: Character) {
         val updatedList = _characters.value.toMutableList()
         updatedList.add(newCharacter)
