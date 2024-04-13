@@ -60,6 +60,8 @@ fun CharactersListView() {
 
 @Composable
 private fun CharactersListViewItem(character: Character) {
+    val nav = LocalNavController.current;
+
     ListItem(
         headlineContent = { Text(character.name) },
         trailingContent = {
@@ -68,7 +70,7 @@ private fun CharactersListViewItem(character: Character) {
             }
         },
         modifier = Modifier.clickable {
-
+            nav.navigate("character/${character.name}")
         }
     )
 }
