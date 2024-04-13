@@ -28,6 +28,7 @@ fun CharacterDetailsView(characterName: String) {
     val character by charactersViewModel.getCharacter(characterName).collectAsState();
 
     if (character == null) {
+        LocalSnackbarController.current.showSnackBar("Brak takiego id");
         nav.navigateUp()
         return;
     }
