@@ -35,22 +35,6 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            val charactersTab = TabBarItem(
-                title = "Postacie",
-                routeName = "characters",
-                selectedIcon = Icons.Filled.People,
-                unselectedIcon = Icons.Outlined.People
-            )
-
-            val diceTab = TabBarItem(
-                title = "Kostka",
-                routeName = "dice",
-                selectedIcon = Icons.Filled.Casino,
-                unselectedIcon = Icons.Outlined.Casino,
-            )
-
-            val tabBarItems = listOf(charactersTab, diceTab)
-            val navController = rememberNavController()
             val charactersViewModel: CharactersViewModel = viewModel()
 
             AppTheme {
@@ -58,45 +42,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    CompositionLocalProvider(LocalNavController provides navController) {
-                        val navBackStackEntry by navController.currentBackStackEntryAsState()
-                        val currentDestination = navBackStackEntry?.destination
-                        val showBn = currentDestination?.hierarchy?.any {
-                            listOf(
-                                charactersTab.routeName,
-                                diceTab.routeName
-                            ).contains(it.route)
-                        } == true;
-                        Scaffold(
-                            bottomBar = { if (showBn) BottomNavigationBar(navItems = tabBarItems) }
-                        ) {
-                            NavHost(
-                                navController = navController,
-                                startDestination = "main",
-                                Modifier.padding(it)
-                            ) {
-                                navigation(startDestination = "characters", route = "main") {
-                                    navigation(startDestination = "list", route = "characters") {
-                                        composable("list") { CharactersListView() }
-                                    }
-
-                                    composable(diceTab.routeName) {
-                                        Text(diceTab.title)
-                                    }
-                                }
-                                composable("${charactersTab.routeName}/create") { NewCharacterView() }
-                                composable(
-                                    "character/{characterName}",
-                                    arguments = listOf(navArgument("characterName") {
-                                        type = NavType.StringType
-                                    })
-                                ) { backStackEntry ->
-                                    backStackEntry.arguments?.getString("characterName")
-                                        ?.let { it1 -> CharacterDetailsView(it1) }
-                                }
-                            }
-                        }
-                    }
+                    MainNavGraph()
                 }
             }
         }
