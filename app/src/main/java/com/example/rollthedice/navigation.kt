@@ -49,7 +49,7 @@ data class TabBarItem(
 val LocalNavController = compositionLocalOf<NavHostController> { error("No NavController found!") }
 
 @Composable
-fun MainNavGraph () {
+fun MainNavGraph() {
     val charactersTab = TabBarItem(
         title = "Postacie",
         routeName = "characters",
@@ -89,9 +89,7 @@ fun MainNavGraph () {
                         composable("list") { CharacterListView() }
                     }
 
-                    composable(diceTab.routeName) {
-                        Text(diceTab.title)
-                    }
+                    composable(diceTab.routeName) { Dice() }
                 }
                 composable("${charactersTab.routeName}/create") { NewCharacterView() }
                 composable(
