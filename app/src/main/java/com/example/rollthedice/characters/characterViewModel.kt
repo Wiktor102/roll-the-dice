@@ -1,11 +1,11 @@
-package com.example.rollthedice
+package com.example.rollthedice.characters
 
 import android.content.Context
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.get
+import com.example.rollthedice.utilities.mapState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -64,7 +64,7 @@ data class Character(
     val health: Int
 );
 
-class CharactersViewModel : ViewModel() {
+class CharacterViewModel : ViewModel() {
     private val _characters = MutableStateFlow<List<Character>>(emptyList());
     val characters: StateFlow<List<Character>> = _characters;
 
@@ -90,9 +90,9 @@ class CharactersViewModel : ViewModel() {
     }
 
     companion object {
-        fun get(context: Context): CharactersViewModel {
+        fun get(context: Context): CharacterViewModel {
             val viewModelStoreOwner = context as ViewModelStoreOwner;
-            val quotesModel = ViewModelProvider(viewModelStoreOwner).get<CharactersViewModel>();
+            val quotesModel = ViewModelProvider(viewModelStoreOwner).get<CharacterViewModel>();
             return quotesModel;
         }
     }

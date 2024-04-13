@@ -1,4 +1,4 @@
-package com.example.rollthedice
+package com.example.rollthedice.ui.components
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.Icons

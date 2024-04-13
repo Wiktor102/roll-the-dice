@@ -1,4 +1,4 @@
-package com.example.rollthedice
+package com.example.rollthedice.utilities
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
@@ -11,6 +11,7 @@ import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import com.example.rollthedice.MainNavGraph
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 

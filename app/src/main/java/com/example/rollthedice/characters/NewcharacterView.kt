@@ -1,4 +1,4 @@
-package com.example.rollthedice
+package com.example.rollthedice.characters
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -29,6 +29,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.get
+import com.example.rollthedice.LocalNavController
+import com.example.rollthedice.ui.components.Dropdown
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview
@@ -43,15 +45,15 @@ fun NewCharacterView() {
     var characterAlignment by rememberSaveable { mutableStateOf<CharacterAlignment?>(null) }
 
     var submitted by rememberSaveable { mutableStateOf(false) }
-    val charactersViewModel =
-        ViewModelProvider(LocalContext.current as ViewModelStoreOwner).get<CharactersViewModel>();
+    val characterViewModel =
+        ViewModelProvider(LocalContext.current as ViewModelStoreOwner).get<CharacterViewModel>();
 
     fun submit() {
         submitted = true;
         if (characterName == "") return;
         if (listOf(characterType, characterClass, characterAlignment).contains(null)) return;
 
-        charactersViewModel.addCharacter(
+        characterViewModel.addCharacter(
             Character(
                 name = characterName,
                 race = characterType!!,

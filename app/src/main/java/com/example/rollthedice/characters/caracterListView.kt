@@ -1,4 +1,4 @@
-package com.example.rollthedice
+package com.example.rollthedice.characters
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -24,12 +24,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import com.example.rollthedice.LocalNavController
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CharactersListView() {
+fun CharacterListView() {
     val nav = LocalNavController.current;
-    val viewModel = CharactersViewModel.get(LocalContext.current);
+    val viewModel = CharacterViewModel.get(LocalContext.current);
     val characters by viewModel.characters.collectAsState();
 
     Scaffold(

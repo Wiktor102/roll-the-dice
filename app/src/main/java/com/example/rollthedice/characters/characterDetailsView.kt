@@ -1,4 +1,4 @@
-package com.example.rollthedice
+package com.example.rollthedice.characters
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
@@ -19,13 +19,15 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import com.example.rollthedice.LocalNavController
+import com.example.rollthedice.utilities.LocalSnackbarController
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CharacterDetailsView(characterName: String) {
     val nav = LocalNavController.current
-    val charactersViewModel = CharactersViewModel.get(LocalContext.current)
-    val character by charactersViewModel.getCharacter(characterName).collectAsState();
+    val characterViewModel = CharacterViewModel.get(LocalContext.current)
+    val character by characterViewModel.getCharacter(characterName).collectAsState();
 
     if (character == null) {
         LocalSnackbarController.current.showSnackBar("Brak takiego id");

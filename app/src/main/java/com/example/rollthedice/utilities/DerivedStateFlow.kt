@@ -1,4 +1,4 @@
-package com.example.rollthedice
+package com.example.rollthedice.utilities
 
 import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.coroutineScope

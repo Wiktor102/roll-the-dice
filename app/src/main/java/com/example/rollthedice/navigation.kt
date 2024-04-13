@@ -1,7 +1,6 @@
 package com.example.rollthedice
 
 
-import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Casino
@@ -35,6 +34,9 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.example.rollthedice.characters.CharacterDetailsView
+import com.example.rollthedice.characters.CharacterListView
+import com.example.rollthedice.characters.NewCharacterView
 
 data class TabBarItem(
     val title: String,
@@ -84,7 +86,7 @@ fun MainNavGraph () {
             ) {
                 navigation(startDestination = "characters", route = "main") {
                     navigation(startDestination = "list", route = "characters") {
-                        composable("list") { CharactersListView() }
+                        composable("list") { CharacterListView() }
                     }
 
                     composable(diceTab.routeName) {
