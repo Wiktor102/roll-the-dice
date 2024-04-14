@@ -28,11 +28,14 @@ import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material3.Button
 import androidx.compose.material3.ElevatedButton
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -66,6 +69,7 @@ import kotlin.math.floor
 import kotlin.math.round
 import kotlin.random.Random
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Dice() {
     var selectedDice by rememberSaveable { mutableStateOf<String?>(null) }
@@ -90,27 +94,33 @@ fun Dice() {
         result = Random.nextInt(1, sides + 1)
     }
 
-    Column {
-        Spacer(modifier = Modifier.size(Dp(10.0F)))
-
-        DiceSelector(selectedDice, ::onDiceSelected)
-        Column(
-            modifier = Modifier
-                .padding(Dp(30.0F))
-                .fillMaxWidth()
-                .wrapContentSize(Alignment.Center)
-        ) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center,
-                modifier = Modifier.weight(1f).fillMaxWidth()
-            ) {
-                if (rolling) Text("Rzucanie...")
-                if (result != null) Text(result.toString(), fontSize = 48.sp)
-            }
-            DiceTrigger(rolling, ::onRollingStart, ::onRollingEnd);
+    Scaffold (
+        topBar = {
+            TopAppBar(title = { Text("Wybierz rodziej kostki") })
         }
+    ) {
+        Column(Modifier.padding(it)) {
+            DiceSelector(selectedDice, ::onDiceSelected)
+            Column(
+                modifier = Modifier
+                    .padding(Dp(30.0F))
+                    .fillMaxWidth()
+                    .wrapContentSize(Alignment.Center)
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center,
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth()
+                ) {
+                    if (rolling) Text("Rzucanie...")
+                    if (result != null) Text(result.toString(), fontSize = 48.sp)
+                }
+                DiceTrigger(rolling, ::onRollingStart, ::onRollingEnd);
+            }
 
+        }
     }
 }
 
@@ -118,11 +128,6 @@ fun Dice() {
 fun DiceSelector(selectedDice: String?, onDiceSelected: (String?) -> Unit) {
     val itemList = listOf("D4", "D6", "D8", "D10", "D12", "D20")
 
-    Text(
-        "Wybierz rodziej kostki",
-        fontSize = 20.sp,
-        modifier = Modifier.padding(top = 10.dp, start = 10.dp, bottom = 4.dp)
-    )
     LazyRow(modifier = Modifier.padding(10.dp)) {
 
         items(itemList) { item ->
