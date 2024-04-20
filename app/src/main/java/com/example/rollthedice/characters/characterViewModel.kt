@@ -1,6 +1,9 @@
 package com.example.rollthedice.characters
 
 import android.content.Context
+import android.os.Bundle
+import androidx.compose.runtime.saveable.Saver
+import androidx.compose.runtime.saveable.SaverScope
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
@@ -8,6 +11,9 @@ import androidx.lifecycle.get
 import com.example.rollthedice.utilities.mapState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlin.math.floor
+import kotlin.random.Random
+import kotlin.reflect.KProperty
 
 enum class CharacterRace(private val typeName: String) {
     HUMAN("Człowiek"),
@@ -45,8 +51,73 @@ data class Character(
     val name: String,
     val race: CharacterRace,
     val characterClass: CharacterClass,
+    val stats: CharacterStats,
     val health: Int
-);
+)
+
+data class CharacterStats(
+    val strength: Int,
+    val dexterity: Int,
+    val constitution: Int,
+    val intelligence: Int,
+    val wisdom: Int,
+    val charisma: Int,
+) {
+//    operator fun getValue(nothing: Nothing?, property: KProperty<*>): Any {
+//        return this
+//    }
+//
+//    operator fun setValue(nothing: Nothing?, property: KProperty<*>, any: Any) {
+//
+//    }
+
+    companion object {
+        fun generate(): CharacterStats {
+            return CharacterStats(
+                strength = Random.nextInt(1, 21),
+                dexterity = Random.nextInt(1, 21),
+                constitution = Random.nextInt(1, 21),
+                intelligence = Random.nextInt(1, 21),
+                wisdom = Random.nextInt(1, 21),
+                charisma = Random.nextInt(1, 21),
+            )
+        }
+
+        fun getModifier(sourceValue: Int): Int {
+            return floor(((sourceValue - 10 )/ 2).toDouble()).toInt()
+        }
+
+        fun getModifierAsString(sourceValue: Int?): String {
+            if (sourceValue == null) return "?"
+            val modifier = getModifier(sourceValue)
+            if (modifier >= 0) return "+${modifier}"
+            return modifier.toString()
+        }
+    }
+}
+
+val CharacterStatsSaver = Saver<CharacterStats, Bundle>(
+    save = {value ->
+        val bundle = Bundle()
+        bundle.putInt("strength", value.strength)
+        bundle.putInt("dexterity", value.dexterity)
+        bundle.putInt("constitution", value.constitution)
+        bundle.putInt("intelligence", value.intelligence)
+        bundle.putInt("wisdom", value.wisdom)
+        bundle.putInt("charisma", value.charisma)
+        return@Saver bundle
+    },
+    restore = {value ->
+        CharacterStats(
+            value.getInt("strength"),
+            value.getInt("dexterity"),
+            value.getInt("constitution"),
+            value.getInt("intelligence"),
+            value.getInt("wisdom"),
+            value.getInt("charisma")
+        )
+    }
+)
 
 class CharacterViewModel : ViewModel() {
     private val _characters = MutableStateFlow<List<Character>>(emptyList());
