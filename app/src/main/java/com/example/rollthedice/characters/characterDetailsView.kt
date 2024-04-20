@@ -6,13 +6,14 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Casino
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.outlined.Casino
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -20,7 +21,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -28,13 +28,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.rollthedice.LocalNavController
 import com.example.rollthedice.characters.ui.StatBox
 import com.example.rollthedice.characters.ui.Stats
-import com.example.rollthedice.ui.components.Dropdown
 import com.example.rollthedice.utilities.LocalSnackbarController
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -80,7 +78,7 @@ fun CharacterDetailsView(characterName: String) {
         },
         floatingActionButton = {
             FloatingActionButton(onClick = { /*TODO*/ }) {
-                Icon(imageVector = Icons.Filled.Casino, contentDescription = "Rzuć")
+                Icon(imageVector = Icons.Outlined.Casino, contentDescription = "Rzuć")
             }
         }
     ) {
@@ -89,6 +87,7 @@ fun CharacterDetailsView(characterName: String) {
                 .padding(it)
                 .padding(horizontal = 10.dp)
                 .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
         ) {
             Stats(character!!.stats)
 

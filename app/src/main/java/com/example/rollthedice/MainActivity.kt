@@ -1,5 +1,6 @@
 package com.example.rollthedice
 
+import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -16,6 +17,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        appContext = this
         setContent {
             val characterViewModel: CharacterViewModel = viewModel()
 
@@ -30,5 +32,9 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    companion object {
+        lateinit var appContext: Context
     }
 }

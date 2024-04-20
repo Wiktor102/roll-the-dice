@@ -1,19 +1,24 @@
 package com.example.rollthedice.characters
 
+import android.app.Application
 import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.SaverScope
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.get
+import com.example.rollthedice.MainActivity
 import com.example.rollthedice.utilities.mapState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
 import kotlin.math.floor
 import kotlin.random.Random
-import kotlin.reflect.KProperty
+import com.google.gson.*
+import kotlinx.coroutines.flow.toList
 
 enum class CharacterRace(private val typeName: String) {
     HUMAN("Człowiek"),
@@ -119,9 +124,13 @@ val CharacterStatsSaver = Saver<CharacterStats, Bundle>(
     }
 )
 
-class CharacterViewModel : ViewModel() {
+class CharacterViewModel() : ViewModel() {
     private val _characters = MutableStateFlow<List<Character>>(emptyList());
     val characters: StateFlow<List<Character>> = _characters;
+
+    init {
+        read()
+    }
 
     fun getCharacter(name: String): StateFlow<Character?> {
         return _characters.mapState {items ->
@@ -133,6 +142,7 @@ class CharacterViewModel : ViewModel() {
         val updatedList = _characters.value.toMutableList()
         updatedList.add(newCharacter)
         _characters.value = updatedList
+        save();
     }
 
     fun updateCharacterHealth(characterName: String, newHealth: Int) {
@@ -141,6 +151,26 @@ class CharacterViewModel : ViewModel() {
         if (productIndex != -1) {
             updatedList[productIndex] = updatedList[productIndex].copy(health = newHealth)
             _characters.value = updatedList
+        }
+    }
+
+    private fun save() {
+        val sharedPref = MainActivity.appContext.getSharedPreferences("roll-the-dice", Context.MODE_PRIVATE)
+        val editor = sharedPref.edit()
+
+        val charactersAsJson = characters.value.joinToString(";") { Gson().toJson(it) }
+        editor.putString("characters", charactersAsJson)
+        editor.apply()
+    }
+
+    private fun read() {
+        val sharedPref = MainActivity.appContext.getSharedPreferences("roll-the-dice", Context.MODE_PRIVATE)
+        val jsonString = sharedPref.getString("characters", null)
+
+        if (jsonString != null) {
+            val gson = Gson()
+            val parsed: List<Character> = jsonString.split(";").map { gson.fromJson(it, Character::class.java) }
+            _characters.value = parsed
         }
     }
 
