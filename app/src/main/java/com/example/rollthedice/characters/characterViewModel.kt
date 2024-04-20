@@ -41,26 +41,10 @@ enum class CharacterClass(private val typeName: String) {
     }
 }
 
-enum class CharacterAlignment(private val typeName: String) {
-    LAWFUL_GOOD("Uczciwy dobry"),
-    NEUTRAL_GOOD("Neutralny dobry"),
-    CHAOTIC_GOOD("Chaotyczny dobry"),
-    TRUE_NEUTRAL("Prawdziwie neutralny"),
-    CHAOTIC_NEUTRAL("Chaotyczny neutralny"),
-    LAWFUL_EVIL("Uczciwy wrogi"),
-    NEUTRAL_EVIL("Neutralny wrogi"),
-    CHAOTIC_EVIL("Chaotyczny wrogi");
-
-    override fun toString(): String {
-        return typeName;
-    }
-}
-
 data class Character(
     val name: String,
     val race: CharacterRace,
     val characterClass: CharacterClass,
-    val alignment: CharacterAlignment,
     val health: Int
 );
 
