@@ -40,7 +40,6 @@ import com.example.rollthedice.LocalNavController
 import com.example.rollthedice.characters.ui.StatBox
 import com.example.rollthedice.characters.ui.Stats
 import com.example.rollthedice.ui.components.Dropdown
-import com.example.rollthedice.utilities.LocalSnackbarController
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview

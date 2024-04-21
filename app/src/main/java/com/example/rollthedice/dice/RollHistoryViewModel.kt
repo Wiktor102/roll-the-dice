@@ -36,6 +36,12 @@ class RollHistoryViewModel : ViewModel() {
     fun deleteRoll(uuid: UUID) {
         val ml = _rolls.value.toMutableList()
         _rolls.value = ml.filter { it.id != uuid }
+        save()
+    }
+
+    fun delete() {
+        _rolls.value = listOf()
+        save()
     }
 
     private fun save() {
