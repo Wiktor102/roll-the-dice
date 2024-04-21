@@ -17,6 +17,7 @@ import androidx.compose.material.icons.filled.FormatPaint
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.People
+import androidx.compose.material.icons.filled.Route
 import androidx.compose.material.icons.filled.Vibration
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -41,6 +42,7 @@ import com.example.rollthedice.ui.components.DropdownListItem
 import com.example.rollthedice.ui.components.ExpandableList
 import com.example.rollthedice.ui.components.OutlinedDropdown
 import com.example.rollthedice.ui.components.OutlinedDropdownItem
+import dev.ricknout.composesensors.BuildConfig
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -113,25 +115,36 @@ fun SettingsView() {
                     Divider(Modifier.offset(56.dp, 0.dp))
                 }
 
-                Column {
-                    ListItem(
-                        headlineContent = { Text("Opis", fontWeight = FontWeight.Bold) },
-                        leadingContent = {
-                            Icon(
-                                imageVector = Icons.Filled.Description,
-                                contentDescription = "Autorzy"
-                            )
-                        },
-                        modifier = Modifier.padding(padding)
-                    )
-                    Text(
-                        "Lorem Ipsum is simply dummy text of the printing and typesetting industry.",
-                        modifier = Modifier
-                            .padding(padding)
-                            .padding(start = 56.dp, bottom = 8.dp, end = 16.dp)
-                            .offset(0.dp, (-8).dp)
-                    )
-                }
+//                Column {
+//                    ListItem(
+//                        headlineContent = { Text("Opis", fontWeight = FontWeight.Bold) },
+//                        leadingContent = {
+//                            Icon(
+//                                imageVector = Icons.Filled.Description,
+//                                contentDescription = "Autorzy"
+//                            )
+//                        },
+//                        modifier = Modifier.padding(padding)
+//                    )
+//                    Text(
+//                        "Lorem Ipsum is simply dummy text of the printing and typesetting industry.",
+//                        modifier = Modifier
+//                            .padding(padding)
+//                            .padding(start = 56.dp, bottom = 8.dp, end = 16.dp)
+//                            .offset(0.dp, (-8).dp)
+//                    )
+//                }
+
+                val context = LocalContext.current
+                val pInfo = context.packageManager.getPackageInfo(context.packageName, 0);
+                ListItem(
+                    headlineContent = { Text("Wersja", fontWeight = FontWeight.Bold) },
+                    leadingContent = {
+                        Icon(imageVector = Icons.Filled.Route, contentDescription = "Wersja")
+                    },
+                    trailingContent = { Text("v " + pInfo.versionName, style = MaterialTheme.typography.bodyLarge)},
+                    modifier = Modifier.padding(padding)
+                )
             }
             Divider()
         }
