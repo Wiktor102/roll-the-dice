@@ -1,11 +1,14 @@
 package com.example.rollthedice.characters
 
 import android.content.Context
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.get
 import com.example.rollthedice.MainActivity
+import com.example.rollthedice.utilities.LocalSnackbarController
+import com.example.rollthedice.utilities.SnackbarController
 import com.example.rollthedice.utilities.mapState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -102,14 +105,19 @@ class CharacterViewModel() : ViewModel() {
     fun getCharacter(name: String): StateFlow<Character?> {
         return _characters.mapState {items ->
             items.find {it.name == name}
-        };
+        }
     }
 
     fun addCharacter(newCharacter: Character) {
         val updatedList = _characters.value.toMutableList()
         updatedList.add(newCharacter)
         _characters.value = updatedList
-        save();
+        save()
+    }
+
+    fun deleteCharacter(characterName: String) {
+        _characters.value = characters.value.filter { it.name != characterName }
+        save()
     }
 
     fun updateCharacterHealth(characterName: String, newHealth: Int) {

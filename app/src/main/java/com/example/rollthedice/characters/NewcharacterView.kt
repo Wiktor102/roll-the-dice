@@ -21,6 +21,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
@@ -38,6 +40,7 @@ import com.example.rollthedice.LocalNavController
 import com.example.rollthedice.characters.ui.StatBox
 import com.example.rollthedice.characters.ui.Stats
 import com.example.rollthedice.ui.components.Dropdown
+import com.example.rollthedice.utilities.LocalSnackbarController
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview
@@ -45,7 +48,17 @@ import com.example.rollthedice.ui.components.Dropdown
 fun NewCharacterView() {
     val nav = LocalNavController.current
     var characterName by rememberSaveable { mutableStateOf("") }
-    val nameErrorText = @Composable { Text("To pole jest wymagane") }
+
+    var nameError by rememberSaveable { mutableStateOf<String?>(null) }
+    val nameErrorText by remember {
+        derivedStateOf<@Composable () -> Unit> {
+            @Composable {
+                Text(
+                    nameError!!
+                )
+            }
+        }
+    }
 
     var characterRace by rememberSaveable { mutableStateOf<CharacterRace?>(null) }
     var characterClass by rememberSaveable { mutableStateOf<CharacterClass?>(null) }
@@ -54,13 +67,22 @@ fun NewCharacterView() {
     var submitted by rememberSaveable { mutableStateOf(false) }
     val characterViewModel =
         ViewModelProvider(LocalContext.current as ViewModelStoreOwner).get<CharacterViewModel>()
-
+    val characters by characterViewModel.characters.collectAsState()
 
     fun submit() {
         submitted = true
-        if (characterName == "") return
-        if (listOf(characterRace, characterClass, characterStats).contains(null)) return
+        if (characterName == "") {
+            nameError = "To pole jest wymagane"
+            return
+        }
 
+        if (listOf(characterRace, characterClass, characterStats).contains(null)) return
+        if (characters.find { it.name == characterName } != null) {
+            nameError = "Postać o takiej nazwie już istnieje"
+            return
+        }
+
+        nameError = null
         characterViewModel.addCharacter(
             Character(
                 name = characterName,
@@ -117,7 +139,7 @@ fun NewCharacterView() {
                 onValueChange = { characterName = it },
                 label = { Text("Nazwa postaci") },
                 isError = submitted && characterName.isEmpty(),
-                supportingText = if (submitted && characterName.isEmpty()) nameErrorText else null,
+                supportingText = if (submitted && nameError != null) nameErrorText else null,
                 maxLines = 1,
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
                 modifier = Modifier.fillMaxWidth()
@@ -153,7 +175,10 @@ fun NewCharacterView() {
                             label = "Incjatywa",
                             value = if (characterStats != null) "+" + characterStats!!.initiative else "?"
                         )
-                        StatBox(label = "Szybkość", value = if (characterRace != null) characterRace!!.speed.toString()  else "?")
+                        StatBox(
+                            label = "Szybkość",
+                            value = if (characterRace != null) characterRace!!.speed.toString() else "?"
+                        )
                     }
                 }
             }

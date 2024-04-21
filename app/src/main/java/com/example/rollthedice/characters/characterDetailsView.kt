@@ -14,6 +14,8 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.outlined.Casino
+import androidx.compose.material.icons.outlined.Warning
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -21,13 +23,20 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.rollthedice.LocalNavController
@@ -43,10 +52,13 @@ fun CharacterDetailsView(characterName: String) {
     val character by characterViewModel.getCharacter(characterName).collectAsState();
 
     if (character == null) {
-        LocalSnackbarController.current.showSnackBar("Brak takiego id");
+        LocalSnackbarController.current.showSnackBar("Brak takiego id")
         nav.navigateUp()
-        return;
+        return
     }
+
+    var showDeleteDialog by remember { mutableStateOf(false) }
+    DeleteAlertDialog(characterName, showDeleteDialog) { showDeleteDialog = it }
 
     Scaffold(
         topBar = {
@@ -61,13 +73,13 @@ fun CharacterDetailsView(characterName: String) {
                     }
                 },
                 actions = {
-                    IconButton(onClick = { }) {
-                        Icon(
-                            imageVector = Icons.Filled.Edit,
-                            contentDescription = "Edytuj",
-                        )
-                    }
-                    IconButton(onClick = { }) {
+//                    IconButton(onClick = { }) {
+//                        Icon(
+//                            imageVector = Icons.Filled.Edit,
+//                            contentDescription = "Edytuj",
+//                        )
+//                    }
+                    IconButton(onClick = { showDeleteDialog = true }) {
                         Icon(
                             imageVector = Icons.Filled.Delete,
                             contentDescription = "Usuń",
@@ -92,7 +104,7 @@ fun CharacterDetailsView(characterName: String) {
             Stats(character!!.stats)
 
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                Row (horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     Text(
                         character!!.race.toString(),
                         fontSize = 20.sp,
@@ -124,5 +136,55 @@ fun CharacterDetailsView(characterName: String) {
             }
 
         }
+    }
+}
+
+@Composable
+fun DeleteAlertDialog (characterName: String, show: Boolean, setShow: (newState: Boolean) -> Unit) {
+    val nav = LocalNavController.current
+    val characterViewModel = CharacterViewModel.get(LocalContext.current)
+
+    if (show) {
+        val spanStyles = listOf(
+            AnnotatedString.Range(
+                SpanStyle(fontWeight = FontWeight.Bold),
+                start = 34,
+                end = 34 + characterName.length
+            )
+        )
+
+        AlertDialog(
+            onDismissRequest = { setShow(false) },
+            icon = { Icon(imageVector = Icons.Outlined.Warning, contentDescription = "Ostrzeżenie")},
+            title = {
+                Text(text = "Czy jesteś pewnien?")
+            },
+            text = {
+                Text(
+                    text = AnnotatedString(
+                        "Czy na pewno chcesz usunąć postać ${characterName}?",
+                        spanStyles = spanStyles
+                    )
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        characterViewModel.deleteCharacter(characterName)
+                        nav.navigateUp()
+                        setShow(false)
+                    }
+                ) {
+                    Text("Usuń")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { setShow(false) }
+                ) {
+                    Text("Anuluj")
+                }
+            }
+        )
     }
 }
