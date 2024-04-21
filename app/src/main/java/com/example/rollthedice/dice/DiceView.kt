@@ -1,6 +1,5 @@
 package com.example.rollthedice.dice
 
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -31,6 +30,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -55,6 +55,7 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.rollthedice.LocalNavController
+import com.example.rollthedice.settings.SettingsViewModel
 import dev.ricknout.composesensors.linearacceleration.isLinearAccelerationSensorAvailable
 import dev.ricknout.composesensors.linearacceleration.rememberLinearAccelerationSensorValueAsState
 import kotlinx.coroutines.delay
@@ -70,25 +71,30 @@ import kotlin.random.Random
 @Composable
 fun DiceView() {
     val nav = LocalNavController.current
-    val haptic = LocalHapticFeedback.current
 
     var selectedDice by rememberSaveable { mutableStateOf<String?>("D6") }
     var rolling by rememberSaveable { mutableStateOf(false) }
     var result by rememberSaveable { mutableStateOf<Int?>(null) }
 
     val rollHistoryViewModel = RollHistoryViewModel.get(LocalContext.current)
+    val settingsViewModel = SettingsViewModel.get(LocalContext.current)
+    val vibrationsEnabled by settingsViewModel.vibrations.collectAsState()
 
-    val timer = Timer()
-    LaunchedEffect (rolling) {
-        timer.scheduleAtFixedRate(object : TimerTask() {
-            override fun run() {
-                if (!rolling) {
-                    timer.cancel()
+    if (vibrationsEnabled) {
+        val timer = Timer()
+        val haptic = LocalHapticFeedback.current
+
+        LaunchedEffect (rolling) {
+            timer.scheduleAtFixedRate(object : TimerTask() {
+                override fun run() {
+                    if (!rolling) {
+                        timer.cancel()
+                    }
+
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                 }
-
-                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-            }
-        }, 0, 300)
+            }, 0, 300)
+        }
     }
 
     fun onDiceSelected(newDice: String?) {
@@ -143,7 +149,7 @@ fun DiceView() {
                 Modifier
                     .padding(16.dp)
                     .padding(end = 72.dp)) {
-                DiceTrigger(rolling, ::onRollingStart, ::onRollingEnd);
+                DiceTrigger(rolling, ::onRollingStart, ::onRollingEnd)
             }
         }
     }
@@ -185,12 +191,12 @@ fun DiceTrigger(rolling: Boolean, startRoll: () -> Unit, endRoll: () -> Unit) {
         val roundedSensorAvgValue = abs(round(sensorValue.value.toList().sum() / 3))
 
         LaunchedEffect(roundedSensorAvgValue > 1) {
-            delay(200);
+            delay(200)
             if (roundedSensorAvgValue > 1 && !rolling) startRoll()
         }
 
         LaunchedEffect(roundedSensorAvgValue.toInt() == 0) {
-            delay(200);
+            delay(200)
             if (roundedSensorAvgValue.toInt() == 0 && rolling) endRoll()
         }
 

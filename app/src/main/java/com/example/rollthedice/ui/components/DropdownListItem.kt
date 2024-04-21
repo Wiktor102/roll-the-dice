@@ -1,6 +1,7 @@
 package com.example.rollthedice.ui.components
 
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -15,7 +16,7 @@ import androidx.compose.ui.unit.sp
 fun DropdownListItem(icon: ImageVector?, label: String, content: @Composable () -> Unit) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.padding(horizontal = 16.dp)
+        modifier = Modifier.padding(horizontal = 16.dp).height(64.dp)
     ) {
         if (icon != null) {
             Icon(
@@ -24,7 +25,7 @@ fun DropdownListItem(icon: ImageVector?, label: String, content: @Composable () 
                 modifier = Modifier.padding(end = 10.dp)
             )
         }
-        Text(label, fontSize = 20.sp, modifier = Modifier.padding(end = 54.dp))
+        Text(label, fontSize = 20.sp, modifier = Modifier.padding(end = 32.dp))
         content()
     }
 }

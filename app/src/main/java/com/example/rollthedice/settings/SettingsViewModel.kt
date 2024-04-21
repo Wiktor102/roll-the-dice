@@ -14,6 +14,9 @@ class SettingsViewModel:ViewModel() {
     private val _theme = MutableStateFlow("auto")
     val theme: StateFlow<String> = _theme
 
+    private val _vibrations = MutableStateFlow(true)
+    val vibrations: StateFlow<Boolean> = _vibrations
+
     init {
         read()
     }
@@ -24,12 +27,18 @@ class SettingsViewModel:ViewModel() {
         save()
     }
 
+    fun toggleVibrations (toggleOn: Boolean) {
+        _vibrations.value = toggleOn
+        save()
+    }
+
     private fun save() {
         val sharedPref = MainActivity.appContext.getSharedPreferences("roll-the-dice", Context.MODE_PRIVATE)
         val editor = sharedPref.edit()
 
         val settingsAsMap = mapOf(
-            "theme" to theme.value
+            "theme" to theme.value,
+            "vibrations" to vibrations.value
         )
 
         editor.putString("settings", Gson().toJson(settingsAsMap))
@@ -43,6 +52,7 @@ class SettingsViewModel:ViewModel() {
         if (jsonString != null) {
             val settingsAsMap = Gson().fromJson(jsonString, Map::class.java)
             _theme.value = settingsAsMap["theme"] as String? ?: "auto"
+            _vibrations.value = settingsAsMap["vibrations"] as Boolean? ?: true
         }
     }
 

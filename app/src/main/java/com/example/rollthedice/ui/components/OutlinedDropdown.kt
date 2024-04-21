@@ -16,7 +16,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 
-data class OutlinedDropdownItem <T> (val icon: ImageVector, val label: String, val value: T)
+data class OutlinedDropdownItem<T>(val icon: ImageVector, val label: String, val value: T)
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun <T> OutlinedDropdown(
@@ -28,7 +29,7 @@ fun <T> OutlinedDropdown(
 ) {
     var expanded by remember { mutableStateOf(false) }
     val isError = isSubmitted && value == null;
-    val errorText = @Composable{
+    val errorText = @Composable {
         if (isError) {
             Text("Wybierz z listy")
         }
@@ -39,10 +40,17 @@ fun <T> OutlinedDropdown(
         onExpandedChange = { expanded = !expanded },
         modifier = Modifier.fillMaxWidth(),
     ) {
+        val selectedOption = list.find { it.value == value }
         OutlinedTextField(
-            value =  list.find {it.value == value}?.label ?: "",
+            value = selectedOption?.label ?: "",
             onValueChange = {},
             label = { Text(label) },
+            leadingIcon = if (selectedOption != null) (@Composable {
+                Icon(
+                    imageVector = selectedOption.icon,
+                    contentDescription = ""
+                )
+            }) else null,
             readOnly = true,
             trailingIcon = {
                 ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded);
