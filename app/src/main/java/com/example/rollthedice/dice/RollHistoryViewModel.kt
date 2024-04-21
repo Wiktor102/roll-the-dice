@@ -59,7 +59,6 @@ class RollHistoryViewModel : ViewModel() {
 
         if (jsonString != null) {
             val gson = Gson()
-            Log.d("s", jsonString)
             val parsed: List<Roll> = jsonString.split(";").map { gson.fromJson(it, Roll::class.java) }
             _rolls.value = parsed
         }

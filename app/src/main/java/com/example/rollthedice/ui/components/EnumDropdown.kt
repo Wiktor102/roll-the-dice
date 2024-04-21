@@ -19,7 +19,7 @@ import androidx.compose.ui.Modifier
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun <E : Enum<E>> Dropdown(
+fun <E : Enum<E>> EnumDropdown(
     enum: Class<E>,
     value: E?,
     setValue: (E) -> Unit,

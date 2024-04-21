@@ -10,6 +10,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
@@ -38,7 +39,16 @@ fun CharacterListView() {
     val characters by viewModel.characters.collectAsState()
 
     Scaffold(
-        topBar = { TopAppBar(title = { Text("Roll The Dice") }) },
+        topBar = {
+            TopAppBar(
+                title = { Text("Roll The Dice") },
+                actions = {
+                    IconButton(onClick = { nav.navigate("settings") }) {
+                        Icon(imageVector = Icons.Filled.Settings, contentDescription = "Ustawienia")
+                    }
+                }
+            )
+        },
         floatingActionButton = {
             ExtendedFloatingActionButton(
                 onClick = { nav.navigate("characters/create") },

@@ -39,6 +39,7 @@ import com.example.rollthedice.characters.CharacterListView
 import com.example.rollthedice.characters.NewCharacterView
 import com.example.rollthedice.dice.DiceView
 import com.example.rollthedice.dice.RollHistoryView
+import com.example.rollthedice.settings.SettingsView
 
 data class TabBarItem(
     val title: String,
@@ -96,6 +97,7 @@ fun MainNavGraph() {
                     }
                 }
 
+                composable("settings") { SettingsView() }
                 composable("history") { RollHistoryView() }
                 composable("${charactersTab.routeName}/create") { NewCharacterView() }
                 composable(

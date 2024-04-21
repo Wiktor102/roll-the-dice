@@ -39,7 +39,7 @@ import androidx.lifecycle.get
 import com.example.rollthedice.LocalNavController
 import com.example.rollthedice.characters.ui.StatBox
 import com.example.rollthedice.characters.ui.Stats
-import com.example.rollthedice.ui.components.Dropdown
+import com.example.rollthedice.ui.components.EnumDropdown
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview
@@ -148,14 +148,14 @@ fun NewCharacterView() {
                 Stats(characterStats)
 
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Dropdown(
+                    EnumDropdown(
                         enum = CharacterRace::class.java,
                         value = characterRace,
                         setValue = { characterRace = it },
                         label = "Rasa postaci",
                         isSubmitted = submitted
                     )
-                    Dropdown(
+                    EnumDropdown(
                         enum = CharacterClass::class.java,
                         value = characterClass,
                         setValue = { characterClass = it },

@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.rollthedice.characters.CharacterViewModel
 import com.example.rollthedice.dice.RollHistoryViewModel
+import com.example.rollthedice.settings.SettingsViewModel
 import com.example.rollthedice.ui.theme.AppTheme
 import com.example.rollthedice.utilities.SnackbarController
 
@@ -22,6 +23,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             val characterViewModel: CharacterViewModel = viewModel()
             val rollHistoryViewModel: RollHistoryViewModel = viewModel()
+            val settingsViewModel: SettingsViewModel = viewModel()
 
             AppTheme {
                 Surface(
