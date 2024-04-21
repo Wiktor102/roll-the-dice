@@ -37,8 +37,8 @@ enum class CharacterRace(private val typeName: String, val speed: Int) {
 enum class CharacterClass(private val typeName: String) {
     FIGHTER("Wojownik"),
     WIZARD("Mag"),
-    ROGUE("Łotrzyk"),
-    CLERIC("Kleryk"),
+    ROGUE("Łotr"),
+    CLERIC("Kapłlan"),
     BARBARIAN("Barbarzyńca"),
     BARD("Bard"),
     PALADIN("Paladyn"),

@@ -59,7 +59,7 @@ fun CharacterListView() {
     ) {
         if (characters.isEmpty()) {
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text("Nic tu nie ma")
+                Text("Brak zapisanych postaci")
             }
             return@Scaffold;
         }
