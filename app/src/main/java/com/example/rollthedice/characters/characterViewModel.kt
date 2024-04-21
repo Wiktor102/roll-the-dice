@@ -68,6 +68,7 @@ data class CharacterStats(
     val charisma: Int,
 ) {
     val initiative: Int = getModifier(dexterity) + Random.nextInt(1, 21)
+    val armorClass: Int = getModifier(dexterity) + 10
 
     companion object {
         fun generate(): CharacterStats {

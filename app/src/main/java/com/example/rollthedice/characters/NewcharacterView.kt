@@ -170,7 +170,10 @@ fun NewCharacterView() {
                             .fillMaxWidth()
                             .padding(top = 15.dp)
                     ) {
-                        StatBox(label = "Zbroja", value = "1")
+                        StatBox(
+                            label = "Zbroja",
+                            value = if (characterStats != null) characterStats!!.armorClass.toString() else "?"
+                        )
                         StatBox(
                             label = "Incjatywa",
                             value = if (characterStats != null) "+" + characterStats!!.initiative else "?"

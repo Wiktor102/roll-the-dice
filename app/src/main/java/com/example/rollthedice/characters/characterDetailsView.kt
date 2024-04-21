@@ -129,9 +129,9 @@ fun CharacterDetailsView(characterName: String) {
                         .fillMaxWidth()
                         .padding(top = 10.dp)
                 ) {
-                    StatBox(label = "Zbroja", value = "1")
+                    StatBox(label = "Zbroja", value = character!!.stats.armorClass.toString())
                     StatBox(label = "Incjatywa", value = "+" + character!!.stats.initiative)
-                    StatBox(label = "Szybkość", value = "5")
+                    StatBox(label = "Szybkość", value = character!!.race.speed.toString())
                 }
             }
 
