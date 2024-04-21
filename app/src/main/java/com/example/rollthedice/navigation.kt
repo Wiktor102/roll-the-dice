@@ -89,8 +89,12 @@ fun MainNavGraph() {
                         composable("list") { CharacterListView() }
                     }
 
-                    composable(diceTab.routeName) { Dice() }
+                    navigation(startDestination = "roll", route = "dice") {
+                        composable("roll") { Dice() }
+                    }
                 }
+
+                composable("history") { DiceHistoryView() }
                 composable("${charactersTab.routeName}/create") { NewCharacterView() }
                 composable(
                     "character/{characterName}",

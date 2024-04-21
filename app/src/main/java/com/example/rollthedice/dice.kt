@@ -30,10 +30,12 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Stop
+import androidx.compose.material.icons.outlined.History
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -94,6 +96,7 @@ import kotlin.random.Random
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Dice() {
+    val nav = LocalNavController.current
     var selectedDice by rememberSaveable { mutableStateOf<String?>(null) }
     var rolling by rememberSaveable { mutableStateOf(false) }
     var result by rememberSaveable { mutableStateOf<Int?>(null) }
@@ -118,31 +121,34 @@ fun Dice() {
     Scaffold(
         topBar = {
             TopAppBar(title = { Text("Wybierz rodziej kostki") })
+        },
+        floatingActionButton = {
+            FloatingActionButton(onClick = { nav.navigate("history") }) {
+                Icon(imageVector = Icons.Outlined.History, contentDescription = "Poprzednie rzuty")
+            }
         }
     ) {
         Column(Modifier.padding(it)) {
             DiceSelector(selectedDice, ::onDiceSelected)
 
             Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center,
                 modifier = Modifier
-                    .padding(Dp(30.0F))
+                    .padding(30.dp)
                     .fillMaxWidth()
                     .wrapContentSize(Alignment.Center)
+                    .weight(1f)
             ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center,
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxWidth()
-                ) {
-                    if (rolling) {
-                        CircularProgressIndicator(Modifier.padding(bottom = 10.dp))
-                        Text("Rzucanie...")
-                    }
-//                    if (result != null) Text(result.toString(), fontSize = 48.sp)
-                    if (result != null) DiceVisual(selectedDice, result!!)
+                if (rolling) {
+                    CircularProgressIndicator(Modifier.padding(bottom = 10.dp))
+                    Text("Rzucanie...")
                 }
+//                    if (result != null) Text(result.toString(), fontSize = 48.sp)
+                if (result != null) DiceVisual(selectedDice, result!!)
+            }
+
+            Box (Modifier.padding(16.dp).padding(end = 72.dp)) {
                 DiceTrigger(rolling, ::onRollingStart, ::onRollingEnd);
             }
         }
@@ -224,7 +230,8 @@ fun DiceVisual(selectedDice: String?, result: Int) {
     }
 
     var sizeImage by remember { mutableStateOf(IntSize.Zero) }
-    val gradient = Brush.radialGradient(0f to Color(0x00000000), 1f to MaterialTheme.colorScheme.surface)
+    val gradient =
+        Brush.radialGradient(0f to Color(0x00000000), 1f to MaterialTheme.colorScheme.surface)
 
     Box {
         Image(painter = painterResource(drawableId), contentDescription = "Kostka")
@@ -239,9 +246,11 @@ fun DiceVisual(selectedDice: String?, result: Int) {
                     join = StrokeJoin.Round
                 )
             ),
-            modifier = Modifier.align(Alignment.Center).onGloballyPositioned {
-                sizeImage = it.size
-            }
+            modifier = Modifier
+                .align(Alignment.Center)
+                .onGloballyPositioned {
+                    sizeImage = it.size
+                }
         )
 //        Box(modifier = Modifier.matchParentSize().background(gradient))
     }
