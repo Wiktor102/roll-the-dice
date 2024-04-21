@@ -22,7 +22,7 @@ fun DropdownListItem(icon: ImageVector?, label: String, content: @Composable () 
             Icon(
                 icon,
                 contentDescription = "Motyw",
-                modifier = Modifier.padding(end = 10.dp)
+                modifier = Modifier.padding(end = 16.dp)
             )
         }
         Text(label, fontSize = 20.sp, modifier = Modifier.padding(end = 32.dp))
