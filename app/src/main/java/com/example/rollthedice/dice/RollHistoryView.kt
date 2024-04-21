@@ -8,8 +8,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -66,7 +68,7 @@ fun RollHistoryView() {
         }
 
         LazyColumn(Modifier.padding(it)) {
-            items(rolls) { roll ->
+            itemsIndexed(rolls) { i, roll ->
                 val drawableId = LocalContext.current.resources.getIdentifier(
                     roll.dice.lowercase(Locale.ROOT),
                     "drawable",
@@ -85,6 +87,7 @@ fun RollHistoryView() {
                     supportingContent = { Text(roll.getDate().format(df)) },
                     trailingContent = { Text(roll.result.toString(), fontSize = 32.sp) }
                 )
+                if (i != rolls.size - 1) Divider()
             }
         }
     }
