@@ -64,7 +64,7 @@ import kotlin.random.Random
 @Composable
 fun DiceView() {
     val nav = LocalNavController.current
-    var selectedDice by rememberSaveable { mutableStateOf<String?>(null) }
+    var selectedDice by rememberSaveable { mutableStateOf<String?>("D6") }
     var rolling by rememberSaveable { mutableStateOf(false) }
     var result by rememberSaveable { mutableStateOf<Int?>(null) }
     val rollHistoryViewModel = RollHistoryViewModel.get(LocalContext.current)
@@ -114,7 +114,7 @@ fun DiceView() {
                     Text("Rzucanie...")
                 }
 //                    if (result != null) Text(result.toString(), fontSize = 48.sp)
-                if (result != null) DiceVisual(selectedDice, result!!)
+                if (selectedDice != null) DiceVisual(selectedDice, result)
             }
 
             Box (Modifier.padding(16.dp).padding(end = 72.dp)) {
@@ -132,7 +132,7 @@ fun DiceSelector(selectedDice: String?, onDiceSelected: (String?) -> Unit) {
 
         items(itemList) { item ->
             Surface(
-                onClick = { onDiceSelected(if (selectedDice == item) null else item) },
+                onClick = { onDiceSelected(item) },
                 color = if (selectedDice == item) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant,
                 shape = RoundedCornerShape(10),
                 modifier = Modifier
@@ -190,7 +190,7 @@ fun DiceTrigger(rolling: Boolean, startRoll: () -> Unit, endRoll: () -> Unit) {
 
 data class DiceOffset(val x: Dp, val y: Dp, val font: TextUnit)
 @Composable
-fun DiceVisual(selectedDice: String?, result: Int) {
+fun DiceVisual(selectedDice: String?, result: Int?) {
     val context = LocalContext.current
     val drawableId = remember(selectedDice) {
         context.resources.getIdentifier(
@@ -216,7 +216,7 @@ fun DiceVisual(selectedDice: String?, result: Int) {
     Box {
         Image(painter = painterResource(drawableId), contentDescription = "Kostka")
         Text(
-            result.toString(),
+            result?.toString() ?: "?",
             color = MaterialTheme.colorScheme.primary,
             style = TextStyle.Default.copy(
                 fontSize = numberOffset[selectedDice]!!.font,
