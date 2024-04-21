@@ -118,7 +118,7 @@ fun CharacterDetailsView(characterName: String) {
                         .padding(top = 10.dp)
                 ) {
                     StatBox(label = "Zbroja", value = "1")
-                    StatBox(label = "Incjatywa", value = "4")
+                    StatBox(label = "Incjatywa", value = "+" + character!!.stats.initiative)
                     StatBox(label = "Szybkość", value = "5")
                 }
             }

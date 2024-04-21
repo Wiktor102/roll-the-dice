@@ -1,7 +1,5 @@
 package com.example.rollthedice.characters
 
-import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -49,9 +47,9 @@ fun NewCharacterView() {
     var characterName by rememberSaveable { mutableStateOf("") }
     val nameErrorText = @Composable { Text("To pole jest wymagane") }
 
-    var characterType by rememberSaveable { mutableStateOf<CharacterRace?>(null) }
+    var characterRace by rememberSaveable { mutableStateOf<CharacterRace?>(null) }
     var characterClass by rememberSaveable { mutableStateOf<CharacterClass?>(null) }
-    var characterStats by remember { mutableStateOf<CharacterStats?>(null)}
+    var characterStats by remember { mutableStateOf<CharacterStats?>(null) }
 
     var submitted by rememberSaveable { mutableStateOf(false) }
     val characterViewModel =
@@ -61,12 +59,12 @@ fun NewCharacterView() {
     fun submit() {
         submitted = true
         if (characterName == "") return
-        if (listOf(characterType, characterClass, characterStats).contains(null)) return
+        if (listOf(characterRace, characterClass, characterStats).contains(null)) return
 
         characterViewModel.addCharacter(
             Character(
                 name = characterName,
-                race = characterType!!,
+                race = characterRace!!,
                 characterClass = characterClass!!,
                 stats = characterStats!!,
                 health = 100
@@ -131,8 +129,8 @@ fun NewCharacterView() {
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Dropdown(
                         enum = CharacterRace::class.java,
-                        value = characterType,
-                        setValue = { characterType = it },
+                        value = characterRace,
+                        setValue = { characterRace = it },
                         label = "Rasa postaci",
                         isSubmitted = submitted
                     )
@@ -151,8 +149,11 @@ fun NewCharacterView() {
                             .padding(top = 15.dp)
                     ) {
                         StatBox(label = "Zbroja", value = "1")
-                        StatBox(label = "Incjatywa", value = "4")
-                        StatBox(label = "Szybkość", value = "5")
+                        StatBox(
+                            label = "Incjatywa",
+                            value = if (characterStats != null) "+" + characterStats!!.initiative else "?"
+                        )
+                        StatBox(label = "Szybkość", value = if (characterRace != null) characterRace!!.speed.toString()  else "?")
                     }
                 }
             }

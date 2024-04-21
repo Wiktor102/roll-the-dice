@@ -1,11 +1,6 @@
 package com.example.rollthedice.characters
 
-import android.app.Application
 import android.content.Context
-import android.os.Bundle
-import android.util.Log
-import androidx.compose.runtime.saveable.Saver
-import androidx.compose.runtime.saveable.SaverScope
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
@@ -14,24 +9,25 @@ import com.example.rollthedice.MainActivity
 import com.example.rollthedice.utilities.mapState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
 import kotlin.math.floor
 import kotlin.random.Random
 import com.google.gson.*
-import kotlinx.coroutines.flow.toList
 
-enum class CharacterRace(private val typeName: String) {
-    HUMAN("Człowiek"),
-    DWARF("Krasnolód"),
-    ELF("Elf"),
-    HALFLING("Niziołek"),
-    GNOME("Gnom"),
-    HALFORC("Półork"),
-    DRAGONBORN("Drakonid"),
-    GOBLIN("Goblin");
+enum class CharacterRace(private val typeName: String, val speed: Int) {
+    HUMAN("Człowiek", 30),
+    DWARF("Krasnolód", 25),
+    ELF("Elf", 30),
+    HALF_ELF("Półelf", 30),
+    HALFLING("Niziołek", 25),
+    GNOME("Gnom", 25),
+    DRAGONBORN("Drakonid", 30),
+    ORC("Ork", 30),
+    HALF_ORC("Półork", 30),
+    TIEFLING("Diablę", 35),
+    GOBLIN("Goblin", 30);
 
     override fun toString(): String {
-        return typeName;
+        return typeName
     }
 }
 
@@ -48,7 +44,7 @@ enum class CharacterClass(private val typeName: String) {
     DRUID("Druid");
 
     override fun toString(): String {
-        return typeName;
+        return typeName
     }
 }
 
@@ -68,13 +64,7 @@ data class CharacterStats(
     val wisdom: Int,
     val charisma: Int,
 ) {
-//    operator fun getValue(nothing: Nothing?, property: KProperty<*>): Any {
-//        return this
-//    }
-//
-//    operator fun setValue(nothing: Nothing?, property: KProperty<*>, any: Any) {
-//
-//    }
+    val initiative: Int = getModifier(dexterity) + Random.nextInt(1, 21)
 
     companion object {
         fun generate(): CharacterStats {
@@ -100,29 +90,6 @@ data class CharacterStats(
         }
     }
 }
-
-val CharacterStatsSaver = Saver<CharacterStats, Bundle>(
-    save = {value ->
-        val bundle = Bundle()
-        bundle.putInt("strength", value.strength)
-        bundle.putInt("dexterity", value.dexterity)
-        bundle.putInt("constitution", value.constitution)
-        bundle.putInt("intelligence", value.intelligence)
-        bundle.putInt("wisdom", value.wisdom)
-        bundle.putInt("charisma", value.charisma)
-        return@Saver bundle
-    },
-    restore = {value ->
-        CharacterStats(
-            value.getInt("strength"),
-            value.getInt("dexterity"),
-            value.getInt("constitution"),
-            value.getInt("intelligence"),
-            value.getInt("wisdom"),
-            value.getInt("charisma")
-        )
-    }
-)
 
 class CharacterViewModel() : ViewModel() {
     private val _characters = MutableStateFlow<List<Character>>(emptyList());
