@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
@@ -47,6 +48,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.rollthedice.LocalNavController
@@ -185,6 +187,8 @@ fun DiceTrigger(rolling: Boolean, startRoll: () -> Unit, endRoll: () -> Unit) {
     }
 }
 
+
+data class DiceOffset(val x: Dp, val y: Dp, val font: TextUnit)
 @Composable
 fun DiceVisual(selectedDice: String?, result: Int) {
     val context = LocalContext.current
@@ -196,6 +200,15 @@ fun DiceVisual(selectedDice: String?, result: Int) {
         )
     }
 
+    val numberOffset = mapOf(
+        "D4" to DiceOffset(0.dp, 20.dp, 90.sp),
+        "D6" to DiceOffset(0.dp, 0.dp, 90.sp),
+        "D8" to DiceOffset(0.dp, 0.dp, 90.sp),
+        "D10" to DiceOffset(0.dp, (-25).dp, 90.sp),
+        "D12" to DiceOffset(0.dp, 0.dp, 90.sp),
+        "D20" to DiceOffset(0.dp, 0.dp, 70.sp),
+    )
+
     var sizeImage by remember { mutableStateOf(IntSize.Zero) }
     val gradient =
         Brush.radialGradient(0f to Color(0x00000000), 1f to MaterialTheme.colorScheme.surface)
@@ -206,7 +219,7 @@ fun DiceVisual(selectedDice: String?, result: Int) {
             result.toString(),
             color = MaterialTheme.colorScheme.primary,
             style = TextStyle.Default.copy(
-                fontSize = 90.sp,
+                fontSize = numberOffset[selectedDice]!!.font,
                 drawStyle = Stroke(
                     miter = 10f,
                     width = 7f,
@@ -215,6 +228,7 @@ fun DiceVisual(selectedDice: String?, result: Int) {
             ),
             modifier = Modifier
                 .align(Alignment.Center)
+                .offset(numberOffset[selectedDice]!!.x, numberOffset[selectedDice]!!.y)
                 .onGloballyPositioned {
                     sizeImage = it.size
                 }
