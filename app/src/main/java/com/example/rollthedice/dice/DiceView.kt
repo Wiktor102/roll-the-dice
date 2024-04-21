@@ -1,5 +1,6 @@
 package com.example.rollthedice.dice
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -26,9 +27,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
-import androidx.compose.runtime.Composable
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -41,8 +42,10 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
@@ -56,18 +59,37 @@ import dev.ricknout.composesensors.linearacceleration.isLinearAccelerationSensor
 import dev.ricknout.composesensors.linearacceleration.rememberLinearAccelerationSensorValueAsState
 import kotlinx.coroutines.delay
 import java.util.Locale
+import java.util.Timer
+import java.util.TimerTask
 import kotlin.math.abs
 import kotlin.math.round
 import kotlin.random.Random
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DiceView() {
     val nav = LocalNavController.current
+    val haptic = LocalHapticFeedback.current
+
     var selectedDice by rememberSaveable { mutableStateOf<String?>("D6") }
     var rolling by rememberSaveable { mutableStateOf(false) }
     var result by rememberSaveable { mutableStateOf<Int?>(null) }
+
     val rollHistoryViewModel = RollHistoryViewModel.get(LocalContext.current)
+
+    val timer = Timer()
+    LaunchedEffect (rolling) {
+        timer.scheduleAtFixedRate(object : TimerTask() {
+            override fun run() {
+                if (!rolling) {
+                    timer.cancel()
+                }
+
+                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+            }
+        }, 0, 300)
+    }
 
     fun onDiceSelected(newDice: String?) {
         selectedDice = newDice
@@ -114,10 +136,13 @@ fun DiceView() {
                     Text("Rzucanie...")
                 }
 //                    if (result != null) Text(result.toString(), fontSize = 48.sp)
-                if (selectedDice != null) DiceVisual(selectedDice, result)
+                if (selectedDice != null && !rolling) DiceVisual(selectedDice, result)
             }
 
-            Box (Modifier.padding(16.dp).padding(end = 72.dp)) {
+            Box (
+                Modifier
+                    .padding(16.dp)
+                    .padding(end = 72.dp)) {
                 DiceTrigger(rolling, ::onRollingStart, ::onRollingEnd);
             }
         }
