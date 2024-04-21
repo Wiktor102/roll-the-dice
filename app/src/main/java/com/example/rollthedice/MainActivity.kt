@@ -10,6 +10,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.rollthedice.characters.CharacterViewModel
+import com.example.rollthedice.dice.RollHistoryViewModel
 import com.example.rollthedice.ui.theme.AppTheme
 import com.example.rollthedice.utilities.SnackbarController
 
@@ -20,6 +21,7 @@ class MainActivity : ComponentActivity() {
         appContext = this
         setContent {
             val characterViewModel: CharacterViewModel = viewModel()
+            val rollHistoryViewModel: RollHistoryViewModel = viewModel()
 
             AppTheme {
                 Surface(

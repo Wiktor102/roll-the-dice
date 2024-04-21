@@ -37,6 +37,8 @@ import androidx.navigation.navArgument
 import com.example.rollthedice.characters.CharacterDetailsView
 import com.example.rollthedice.characters.CharacterListView
 import com.example.rollthedice.characters.NewCharacterView
+import com.example.rollthedice.dice.DiceView
+import com.example.rollthedice.dice.RollHistoryView
 
 data class TabBarItem(
     val title: String,
@@ -90,11 +92,11 @@ fun MainNavGraph() {
                     }
 
                     navigation(startDestination = "roll", route = "dice") {
-                        composable("roll") { Dice() }
+                        composable("roll") { DiceView() }
                     }
                 }
 
-                composable("history") { DiceHistoryView() }
+                composable("history") { RollHistoryView() }
                 composable("${charactersTab.routeName}/create") { NewCharacterView() }
                 composable(
                     "character/{characterName}",

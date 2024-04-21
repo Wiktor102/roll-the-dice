@@ -1,23 +1,10 @@
-package com.example.rollthedice
+package com.example.rollthedice.dice
 
-import android.content.Context
-import android.hardware.Sensor
-import android.hardware.SensorManager
-import android.print.PrintAttributes.Margins
-import android.util.Log
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.defaultMinSize
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -26,14 +13,12 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material.icons.outlined.History
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -49,57 +34,38 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.withFrameMillis
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.painter.BitmapPainter
-import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.toLowerCase
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.content.ContextCompat.getSystemService
-import dev.ricknout.composesensors.accelerometer.rememberAccelerometerSensorValueAsState
-import dev.ricknout.composesensors.getSensor
-import dev.ricknout.composesensors.getSensorManager
-import dev.ricknout.composesensors.gyroscope.rememberGyroscopeSensorValueAsState
-import dev.ricknout.composesensors.isSensorAvailable
-import dev.ricknout.composesensors.linearacceleration.getLinearAccelerationSensor
+import com.example.rollthedice.LocalNavController
 import dev.ricknout.composesensors.linearacceleration.isLinearAccelerationSensorAvailable
 import dev.ricknout.composesensors.linearacceleration.rememberLinearAccelerationSensorValueAsState
-import dev.ricknout.composesensors.rememberSensorValueAsState
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import java.util.Locale
 import kotlin.math.abs
-import kotlin.math.floor
 import kotlin.math.round
 import kotlin.random.Random
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun Dice() {
+fun DiceView() {
     val nav = LocalNavController.current
     var selectedDice by rememberSaveable { mutableStateOf<String?>(null) }
     var rolling by rememberSaveable { mutableStateOf(false) }
     var result by rememberSaveable { mutableStateOf<Int?>(null) }
+    val rollHistoryViewModel = RollHistoryViewModel.get(LocalContext.current)
 
     fun onDiceSelected(newDice: String?) {
         selectedDice = newDice
@@ -116,6 +82,7 @@ fun Dice() {
         rolling = false
         val sides = selectedDice!!.substring(1).toInt()
         result = Random.nextInt(1, sides + 1)
+        rollHistoryViewModel.addRoll(Roll(selectedDice!!, result!!))
     }
 
     Scaffold(
