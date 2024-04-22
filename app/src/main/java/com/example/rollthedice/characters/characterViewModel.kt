@@ -25,10 +25,8 @@ enum class CharacterRace(private val typeName: String, val speed: Int) {
     HALFLING("Niziołek", 25),
     GNOME("Gnom", 25),
     DRAGONBORN("Drakonid", 30),
-    ORC("Ork", 30),
     HALF_ORC("Półork", 30),
-    TIEFLING("Diablę", 35),
-    GOBLIN("Goblin", 30);
+    TIEFLING("Diabelstwo", 35);
 
     override fun toString(): String {
         return typeName
