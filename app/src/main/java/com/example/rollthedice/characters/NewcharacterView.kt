@@ -1,8 +1,6 @@
 package com.example.rollthedice.characters
 
-import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
@@ -23,7 +21,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -38,7 +35,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
@@ -77,7 +73,9 @@ fun NewCharacterView() {
     var characterClass by rememberSaveable { mutableStateOf<CharacterClass?>(null) }
     var characterStats by remember { mutableStateOf(CharacterStats()) }
 
+    var generatorStarted by remember { mutableStateOf(false) }
     var submitted by rememberSaveable { mutableStateOf(false) }
+
     val characterViewModel =
         ViewModelProvider(LocalContext.current as ViewModelStoreOwner).get<CharacterViewModel>()
     val characters by characterViewModel.characters.collectAsState()
@@ -112,11 +110,16 @@ fun NewCharacterView() {
 
     @Composable
     fun doneFAB() {
-        FloatingActionButton(
-            containerColor = if (characterStats.allNotNull()) MaterialTheme.colorScheme.primaryContainer else Color.Gray,
-            onClick = ::submit
-        ) {
+        if (!characterStats.allNotNull()) return
+        FloatingActionButton( onClick = ::submit) {
             Icon(imageVector = Icons.Outlined.Done, contentDescription = "Zakończ")
+        }
+    }
+
+    @Composable
+    fun startGeneratorFAB() {
+        FloatingActionButton(onClick = { generatorStarted = true }) {
+            Icon(imageVector = Icons.Outlined.Casino, contentDescription = "Losuj")
         }
     }
 
@@ -134,7 +137,7 @@ fun NewCharacterView() {
                 }
             )
         },
-        floatingActionButton = { doneFAB() }
+        floatingActionButton = { if (generatorStarted) doneFAB() else startGeneratorFAB() }
     ) { padding ->
         DraggableProvider(Modifier.padding(padding)) {
             Column(
@@ -201,7 +204,7 @@ fun NewCharacterView() {
                             )
                         }
 
-                        StatsGenerator(characterStats)
+                        StatsGenerator(characterStats, generatorStarted)
                     }
                 }
             }
@@ -210,22 +213,20 @@ fun NewCharacterView() {
 }
 
 @Composable
-fun StatsGenerator(characterStats: CharacterStats) {
-    val generatorStarted by remember { mutableStateOf(true) }
-
-    if (characterStats.allNotNull()) return
-
-    if (!generatorStarted) {
-        return
-    }
-
-    val randomD20 = Random.nextInt(1, 21)
+fun StatsGenerator(
+    characterStats: CharacterStats,
+    generatorStarted: Boolean
+) {
+    if (characterStats.allNotNull() || !generatorStarted) return
 
     Column(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.fillMaxSize().offset(0.dp, (-15).dp)
+        modifier = Modifier
+            .fillMaxSize()
+            .offset(0.dp, (-15).dp)
     ) {
+        val randomD20 = Random.nextInt(1, 21)
         Text(
             "Przeciągnij poniższą liczbę do jednej ze statystyk po lewej",
             textAlign = TextAlign.Center,
