@@ -1,8 +1,10 @@
 package com.example.rollthedice.characters.ui
 
-import android.util.Log
-import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.animation.Animatable
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,6 +19,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -24,7 +27,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -33,13 +36,14 @@ import com.example.rollthedice.characters.CharacterStats
 import com.example.rollthedice.utilities.DragTarget
 import com.example.rollthedice.utilities.DropTarget
 import com.example.rollthedice.utilities.LocalDragTargetInfo
+import com.example.rollthedice.utilities.conditional
 
 @Composable
 fun Stats(
     characterStats: CharacterStats,
     setCharacterStats: ((cs: CharacterStats) -> Unit)? = null
 ) {
-    fun setValue (characterStats: CharacterStats) {
+    fun setValue(characterStats: CharacterStats) {
         if (setCharacterStats == null) return
         setCharacterStats(characterStats)
     }
@@ -111,18 +115,45 @@ fun StatBox(label: String, value: String) {
 
 }
 
+enum class StatBoxWithChipStyle {
+    DEFAULT(),
+    OUTLINED(),
+    OUTLINED_ACTIVE();
+}
+
 @Composable
-fun StatBoxWithChip(label: String, value: String, chipValue: String) {
+fun StatBoxWithChip(
+    label: String,
+    value: String,
+    chipValue: String,
+    style: StatBoxWithChipStyle = StatBoxWithChipStyle.DEFAULT
+) {
     val boxHeight = 70.dp
     val boxWidth = 62.dp
     val chipWidth = boxHeight / 2 * 1.05f
     val chipHeight = 25.dp
+    val colorScheme = MaterialTheme.colorScheme
+    val bg = remember { Animatable(Color.Gray) }
+
+    LaunchedEffect(style) {
+        if (style == StatBoxWithChipStyle.DEFAULT) {
+            bg.animateTo(colorScheme.surfaceVariant, animationSpec = tween(200))
+        } else {
+            bg.animateTo(Color.Transparent, animationSpec = tween(200))
+        }
+    }
 
     Box(
         Modifier
             .size(boxWidth, boxHeight)
             .clip(RoundedCornerShape(5.dp))
-            .background(MaterialTheme.colorScheme.surfaceVariant)
+            .background(bg.value)
+            .conditional(style == StatBoxWithChipStyle.OUTLINED) {
+                border(BorderStroke(1.dp, colorScheme.onSurface), RoundedCornerShape(5.dp))
+            }
+            .conditional(style == StatBoxWithChipStyle.OUTLINED_ACTIVE) {
+                border(BorderStroke(1.dp, colorScheme.primary), RoundedCornerShape(5.dp))
+            }
     ) {
         Row(horizontalArrangement = Arrangement.Center, modifier = Modifier.fillMaxWidth()) {
             Text(
@@ -158,7 +189,9 @@ fun StatBoxWithChip(label: String, value: String, chipValue: String) {
 fun DraggableStatBoxWithChip(label: String, chipValue: Int, modifier: Modifier = Modifier) {
     DragTarget(
         dataToDrop = chipValue,
-        modifier = Modifier.wrapContentSize().then(modifier)
+        modifier = Modifier
+            .wrapContentSize()
+            .then(modifier)
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
             StatBoxWithChip(
@@ -175,7 +208,10 @@ fun DroppableStatBoxWithChip(label: String, chipValue: Int?, setValue: (value: I
     DropTarget<Int>(modifier = Modifier)
     { isInBound, droppedData ->
         var value by remember { mutableStateOf(chipValue) }
-        if (!LocalDragTargetInfo.current.itemDropped && isInBound && droppedData != null) {
+        var style = if (value == null) StatBoxWithChipStyle.OUTLINED else StatBoxWithChipStyle.DEFAULT
+        if (!LocalDragTargetInfo.current.itemDropped && isInBound && value == null) style = StatBoxWithChipStyle.OUTLINED_ACTIVE
+
+        if (!LocalDragTargetInfo.current.itemDropped && isInBound && droppedData != null && value == null) {
             LocalDragTargetInfo.current.itemDropped = true
             LocalDragTargetInfo.current.dataToDrop = null
             value = droppedData
@@ -186,7 +222,8 @@ fun DroppableStatBoxWithChip(label: String, chipValue: Int?, setValue: (value: I
             StatBoxWithChip(
                 label,
                 if (value != null) CharacterStats.getModifierAsString(value) else "?",
-                value?.toString() ?: "?"
+                value?.toString() ?: "?",
+                style = style
             )
         }
     }
