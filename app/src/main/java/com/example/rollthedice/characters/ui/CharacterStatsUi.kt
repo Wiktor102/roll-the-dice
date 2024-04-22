@@ -1,5 +1,6 @@
 package com.example.rollthedice.characters.ui
 
+import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -153,12 +154,9 @@ fun StatBoxWithChip(label: String, value: String, chipValue: String) {
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun DraggableStatBoxWithChip(label: String, chipValue: Int, modifier: Modifier = Modifier) {
     DragTarget(
-        context = LocalContext.current,
-        pagerSize = 3,
         dataToDrop = chipValue,
         modifier = Modifier.wrapContentSize().then(modifier)
     ) {

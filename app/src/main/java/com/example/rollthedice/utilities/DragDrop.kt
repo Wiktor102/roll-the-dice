@@ -10,6 +10,7 @@ package com.example.rollthedice.utilities
  */
 
 import android.content.Context
+import android.util.Log
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.gestures.detectDragGestures
@@ -27,6 +28,7 @@ import androidx.compose.ui.layout.*
 import androidx.compose.ui.unit.IntSize
 import kotlinx.coroutines.launch
 import kotlin.math.abs
+import kotlin.random.Random
 
 internal val LocalDragTargetInfo = compositionLocalOf { DragTargetInfo() }
 
@@ -83,16 +85,10 @@ fun DraggableProvider(
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun <T> DragTarget(
-    context: Context,
-    pagerSize: Int,
-    verticalPagerState: PagerState? = null, // if you have nested / multi paged app
-    horizontalPagerState: PagerState? = null,
+    dataToDrop: T,
     modifier: Modifier,
-    dataToDrop: T, // change type here to your data model class
     content: @Composable (shouldAnimate: Boolean) -> Unit
 ) {
-    val coroutineScope = rememberCoroutineScope()
-
     var currentPosition by remember { mutableStateOf(Offset.Zero) }
     val currentState = LocalDragTargetInfo.current
 
@@ -100,73 +96,18 @@ fun <T> DragTarget(
         .onGloballyPositioned {
             currentPosition = it.localToWindow(Offset.Zero)
         }
-        .pointerInput(Unit) {
+        .pointerInput(dataToDrop) {
             detectDragGestures(
                 onDragStart = {
-
                     currentState.dataToDrop = dataToDrop
                     currentState.isDragging = true
                     currentState.dragPosition = currentPosition + it
-                    currentState.draggableComposable = {
-                        content(false) // render scaled item without animation }
-
-                    }
+                    currentState.draggableComposable = { content(false) }
                 },
                 onDrag = { change, dragAmount ->
                     change.consume()
-
-                    currentState.itemDropped =
-                        false // used to prevent drop target from multiple re-renders
-
+                    currentState.itemDropped = false
                     currentState.dragOffset += Offset(dragAmount.x, dragAmount.y)
-
-                    val xOffset = abs(currentState.dragOffset.x)
-                    val yOffset = abs(currentState.dragOffset.y)
-
-                    coroutineScope.launch {
-
-                        // this is a flag only for demo purposes, change as per your needs
-                        val boundDragEnabled = false
-
-                        if (boundDragEnabled) {
-                            // use this for dragging after the user has dragged the item outside a bound around the original item itself
-                            if (xOffset > 20 && yOffset > 20) {
-                                verticalPagerState?.animateScrollToPage(
-                                    1,
-                                    animationSpec = tween(
-                                        durationMillis = 300,
-                                        easing = androidx.compose.animation.core.EaseOutCirc
-                                    )
-                                )
-                            }
-                        } else {
-                            // for dragging to and fro from different pages in the pager
-                            val currentPage = horizontalPagerState?.currentPage
-                            val dragPositionX =
-                                currentState.dragPosition.x + currentState.dragOffset.x
-                            val dragPositionY =
-                                currentState.dragPosition.y + currentState.dragOffset.y
-
-                            val displayMetrics = context.resources.displayMetrics
-
-                            // if item is very close to left edge of page, move to previous page
-                            if (dragPositionX < 60) {
-                                currentPage?.let {
-                                    if (it > 1) {
-                                        horizontalPagerState.animateScrollToPage(currentPage - 1)
-                                    }
-                                }
-                            } else if (displayMetrics.widthPixels - dragPositionX < 60) {
-                                // if item is very close to right edge of page, move to next page
-                                currentPage?.let {
-                                    if (it < pagerSize) {
-                                        horizontalPagerState.animateScrollToPage(currentPage + 1)
-                                    }
-                                }
-                            }
-                        }
-                    }
-
                 },
                 onDragEnd = {
                     currentState.isDragging = false
@@ -180,7 +121,7 @@ fun <T> DragTarget(
         },
         contentAlignment = Alignment.Center
     ) {
-        content(true) // render positioned content with animation
+        content(true)
     }
 }
 
@@ -206,6 +147,7 @@ fun <T> DropTarget(
     ) {
         val data =
             if (isCurrentDropTarget && !dragInfo.isDragging) dragInfo.dataToDrop as T? else null
+        if (isCurrentDropTarget && !dragInfo.isDragging) Log.d("Drop", data.toString())
         content(isCurrentDropTarget, data)
     }
 }
