@@ -1,5 +1,6 @@
 package com.example.rollthedice.characters.ui
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -10,54 +11,71 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.rollthedice.characters.CharacterStats
+import com.example.rollthedice.utilities.DragTarget
+import com.example.rollthedice.utilities.DropTarget
+import com.example.rollthedice.utilities.LocalDragTargetInfo
 
 @Composable
-fun Stats(characterStats: CharacterStats?) {
+fun Stats(
+    characterStats: CharacterStats,
+    setCharacterStats: ((cs: CharacterStats) -> Unit)? = null
+) {
+    fun setValue (characterStats: CharacterStats) {
+        if (setCharacterStats == null) return
+        setCharacterStats(characterStats)
+    }
+
     Column(
         verticalArrangement = Arrangement.spacedBy(5.dp),
         modifier = Modifier.padding(end = 20.dp)
     ) {
-        StatBoxWithChip(
+        DroppableStatBoxWithChip(
             label = "siła",
-            value = CharacterStats.getModifierAsString(characterStats?.strength),
-            chipValue = characterStats?.strength?.toString() ?: "?"
+            setValue = { setValue(characterStats.copy(strength = it)) },
+            chipValue = characterStats.strength
         )
-        StatBoxWithChip(
+        DroppableStatBoxWithChip(
             label = "zwinność",
-            value = CharacterStats.getModifierAsString(characterStats?.dexterity),
-            chipValue = characterStats?.dexterity?.toString() ?: "?"
+            setValue = { setValue(characterStats.copy(dexterity = it)) },
+            chipValue = characterStats.dexterity
         )
-        StatBoxWithChip(
+        DroppableStatBoxWithChip(
             label = "budowa?",
-            value = CharacterStats.getModifierAsString(characterStats?.constitution),
-            chipValue = characterStats?.constitution?.toString() ?: "?"
+            setValue = { setValue(characterStats.copy(constitution = it)) },
+            chipValue = characterStats.constitution
         )
-        StatBoxWithChip(
+        DroppableStatBoxWithChip(
             label = "inteligencja",
-            value = CharacterStats.getModifierAsString(characterStats?.intelligence),
-            chipValue = characterStats?.intelligence?.toString() ?: "?"
+            setValue = { setValue(characterStats.copy(intelligence = it)) },
+            chipValue = characterStats.intelligence
         )
-        StatBoxWithChip(
+        DroppableStatBoxWithChip(
             label = "wiedza",
-            value = CharacterStats.getModifierAsString(characterStats?.wisdom),
-            chipValue = characterStats?.wisdom?.toString() ?: "?"
+            setValue = { setValue(characterStats.copy(wisdom = it)) },
+            chipValue = characterStats.wisdom
         )
-        StatBoxWithChip(
+        DroppableStatBoxWithChip(
             label = "charyzma",
-            value = CharacterStats.getModifierAsString(characterStats?.charisma),
-            chipValue = characterStats?.charisma?.toString() ?: "?"
+            setValue = { setValue(characterStats.copy(charisma = it)) },
+            chipValue = characterStats.charisma
         )
     }
 }
@@ -105,7 +123,7 @@ fun StatBoxWithChip(label: String, value: String, chipValue: String) {
             .clip(RoundedCornerShape(5.dp))
             .background(MaterialTheme.colorScheme.surfaceVariant)
     ) {
-        Row (horizontalArrangement = Arrangement.Center, modifier = Modifier.fillMaxWidth()) {
+        Row(horizontalArrangement = Arrangement.Center, modifier = Modifier.fillMaxWidth()) {
             Text(
                 label,
                 fontSize = 12.sp,
@@ -132,5 +150,46 @@ fun StatBoxWithChip(label: String, value: String, chipValue: String) {
             .background(MaterialTheme.colorScheme.inversePrimary)
     ) {
         Text(chipValue, modifier = Modifier.align(Alignment.Center))
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun DraggableStatBoxWithChip(label: String, chipValue: Int, modifier: Modifier = Modifier) {
+    DragTarget(
+        context = LocalContext.current,
+        pagerSize = 3,
+        dataToDrop = chipValue,
+        modifier = Modifier.wrapContentSize().then(modifier)
+    ) {
+        Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
+            StatBoxWithChip(
+                label,
+                CharacterStats.getModifierAsString(chipValue),
+                chipValue.toString()
+            )
+        }
+    }
+}
+
+@Composable
+fun DroppableStatBoxWithChip(label: String, chipValue: Int?, setValue: (value: Int) -> Unit) {
+    DropTarget<Int>(modifier = Modifier)
+    { isInBound, droppedData ->
+        var value by remember { mutableStateOf(chipValue) }
+        if (!LocalDragTargetInfo.current.itemDropped && isInBound && droppedData != null) {
+            LocalDragTargetInfo.current.itemDropped = true
+            LocalDragTargetInfo.current.dataToDrop = null
+            value = droppedData
+            setValue(droppedData)
+        }
+
+        Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
+            StatBoxWithChip(
+                label,
+                if (value != null) CharacterStats.getModifierAsString(value) else "?",
+                value?.toString() ?: "?"
+            )
+        }
     }
 }

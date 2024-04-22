@@ -1,6 +1,7 @@
 package com.example.rollthedice.characters
 
 import android.content.Context
+import android.util.Log
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -60,15 +61,29 @@ data class Character(
 )
 
 data class CharacterStats(
-    val strength: Int,
-    val dexterity: Int,
-    val constitution: Int,
-    val intelligence: Int,
-    val wisdom: Int,
-    val charisma: Int,
+    val strength: Int? = null,
+    val dexterity: Int? = null,
+    val constitution: Int? = null,
+    val intelligence: Int? = null,
+    val wisdom: Int? = null,
+    val charisma: Int? = null,
+    val initiativeRoll: Int = Random.nextInt(1, 21)
 ) {
-    val initiative: Int = getModifier(dexterity) + Random.nextInt(1, 21)
-    val armorClass: Int = getModifier(dexterity) + 10
+    val initiative: Int? = if (dexterity != null) getModifier(dexterity) + initiativeRoll else null
+    val armorClass: Int? = if (dexterity != null) getModifier(dexterity) + 10 else null
+
+    fun allNotNull(): Boolean {
+        return !listOf(
+            strength,
+            dexterity,
+            constitution,
+            intelligence,
+            wisdom,
+            charisma,
+            initiative,
+            armorClass
+        ).contains(null)
+    }
 
     companion object {
         fun generate(): CharacterStats {
@@ -83,7 +98,7 @@ data class CharacterStats(
         }
 
         fun getModifier(sourceValue: Int): Int {
-            return floor(((sourceValue - 10 )/ 2).toDouble()).toInt()
+            return floor(((sourceValue - 10) / 2).toDouble()).toInt()
         }
 
         fun getModifierAsString(sourceValue: Int?): String {
@@ -104,8 +119,8 @@ class CharacterViewModel() : ViewModel() {
     }
 
     fun getCharacter(name: String): StateFlow<Character?> {
-        return _characters.mapState {items ->
-            items.find {it.name == name}
+        return _characters.mapState { items ->
+            items.find { it.name == name }
         }
     }
 
@@ -131,7 +146,8 @@ class CharacterViewModel() : ViewModel() {
     }
 
     private fun save() {
-        val sharedPref = MainActivity.appContext.getSharedPreferences("roll-the-dice", Context.MODE_PRIVATE)
+        val sharedPref =
+            MainActivity.appContext.getSharedPreferences("roll-the-dice", Context.MODE_PRIVATE)
         val editor = sharedPref.edit()
 
         val charactersAsJson = characters.value.joinToString(";") { Gson().toJson(it) }
@@ -140,12 +156,14 @@ class CharacterViewModel() : ViewModel() {
     }
 
     private fun read() {
-        val sharedPref = MainActivity.appContext.getSharedPreferences("roll-the-dice", Context.MODE_PRIVATE)
+        val sharedPref =
+            MainActivity.appContext.getSharedPreferences("roll-the-dice", Context.MODE_PRIVATE)
         val jsonString = sharedPref.getString("characters", null)
 
         if (jsonString != null && jsonString != "") {
             val gson = Gson()
-            val parsed: List<Character> = jsonString.split(";").map { gson.fromJson(it, Character::class.java) }
+            val parsed: List<Character> =
+                jsonString.split(";").map { gson.fromJson(it, Character::class.java) }
             _characters.value = parsed
         }
     }

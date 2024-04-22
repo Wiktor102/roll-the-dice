@@ -1,9 +1,15 @@
 package com.example.rollthedice.characters
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
@@ -16,6 +22,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -28,18 +35,24 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.get
 import com.example.rollthedice.LocalNavController
+import com.example.rollthedice.characters.ui.DraggableStatBoxWithChip
 import com.example.rollthedice.characters.ui.StatBox
 import com.example.rollthedice.characters.ui.Stats
 import com.example.rollthedice.ui.components.EnumDropdown
+import com.example.rollthedice.utilities.DraggableProvider
+import kotlin.random.Random
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview
@@ -61,7 +74,7 @@ fun NewCharacterView() {
 
     var characterRace by rememberSaveable { mutableStateOf<CharacterRace?>(null) }
     var characterClass by rememberSaveable { mutableStateOf<CharacterClass?>(null) }
-    var characterStats by remember { mutableStateOf<CharacterStats?>(null) }
+    var characterStats by remember { mutableStateOf(CharacterStats()) }
 
     var submitted by rememberSaveable { mutableStateOf(false) }
     val characterViewModel =
@@ -75,6 +88,7 @@ fun NewCharacterView() {
             return
         }
 
+        if (!characterStats.allNotNull()) return
         if (listOf(characterRace, characterClass, characterStats).contains(null)) return
         if (characters.find { it.name == characterName } != null) {
             nameError = "Postać o takiej nazwie już istnieje"
@@ -87,7 +101,7 @@ fun NewCharacterView() {
                 name = characterName,
                 race = characterRace!!,
                 characterClass = characterClass!!,
-                stats = characterStats!!,
+                stats = characterStats,
                 health = 100
             )
         )
@@ -96,15 +110,11 @@ fun NewCharacterView() {
     }
 
     @Composable
-    fun generateRandomFAB() {
-        FloatingActionButton(onClick = { characterStats = CharacterStats.generate() }) {
-            Icon(imageVector = Icons.Outlined.Casino, contentDescription = "Losuj statystyki")
-        }
-    }
-
-    @Composable
     fun doneFAB() {
-        FloatingActionButton(onClick = ::submit) {
+        FloatingActionButton(
+            containerColor = if (characterStats.allNotNull()) MaterialTheme.colorScheme.primaryContainer else Color.Gray,
+            onClick = ::submit
+        ) {
             Icon(imageVector = Icons.Outlined.Done, contentDescription = "Zakończ")
         }
     }
@@ -123,67 +133,103 @@ fun NewCharacterView() {
                 }
             )
         },
-        floatingActionButton = { if (characterStats == null) generateRandomFAB() else doneFAB() }
+        floatingActionButton = { doneFAB() }
     ) { padding ->
-        Column(
-            verticalArrangement = Arrangement.spacedBy(10.dp),
-            modifier = Modifier
-                .padding(padding)
-                .padding(horizontal = 10.dp)
-                .fillMaxWidth()
-                .verticalScroll(rememberScrollState())
-        ) {
-            TextField(
-                value = characterName,
-                onValueChange = { characterName = it },
-                label = { Text("Nazwa postaci") },
-                isError = submitted && characterName.isEmpty(),
-                supportingText = if (submitted && nameError != null) nameErrorText else null,
-                maxLines = 1,
-                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-                modifier = Modifier.fillMaxWidth()
-            )
+        DraggableProvider(Modifier.padding(padding)) {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(10.dp),
+                modifier = Modifier
+                    .padding(horizontal = 10.dp)
+                    .fillMaxWidth()
+                    .verticalScroll(rememberScrollState())
+            ) {
+                TextField(
+                    value = characterName,
+                    onValueChange = { characterName = it },
+                    label = { Text("Nazwa postaci") },
+                    isError = submitted && characterName.isEmpty(),
+                    supportingText = if (submitted && nameError != null) nameErrorText else null,
+                    maxLines = 1,
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                    modifier = Modifier.fillMaxWidth()
+                )
 
-            Row(Modifier.padding(top = 10.dp)) {
-                Stats(characterStats)
+                Row(
+                    Modifier
+                        .padding(top = 10.dp)
+                        .height(IntrinsicSize.Min)
+                ) {
+                    Stats(characterStats, setCharacterStats = { characterStats = it })
 
-                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    EnumDropdown(
-                        enum = CharacterRace::class.java,
-                        value = characterRace,
-                        setValue = { characterRace = it },
-                        label = "Rasa postaci",
-                        isSubmitted = submitted
-                    )
-                    EnumDropdown(
-                        enum = CharacterClass::class.java,
-                        value = characterClass,
-                        setValue = { characterClass = it },
-                        label = "Klasa postaci",
-                        isSubmitted = submitted
-                    )
-
-                    Row(
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 15.dp)
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(10.dp),
+                        modifier = Modifier.fillMaxHeight()
                     ) {
-                        StatBox(
-                            label = "Zbroja",
-                            value = if (characterStats != null) characterStats!!.armorClass.toString() else "?"
+                        EnumDropdown(
+                            enum = CharacterRace::class.java,
+                            value = characterRace,
+                            setValue = { characterRace = it },
+                            label = "Rasa postaci",
+                            isSubmitted = submitted
                         )
-                        StatBox(
-                            label = "Incjatywa",
-                            value = if (characterStats != null) "+" + characterStats!!.initiative else "?"
+                        EnumDropdown(
+                            enum = CharacterClass::class.java,
+                            value = characterClass,
+                            setValue = { characterClass = it },
+                            label = "Klasa postaci",
+                            isSubmitted = submitted
                         )
-                        StatBox(
-                            label = "Szybkość",
-                            value = if (characterRace != null) characterRace!!.speed.toString() else "?"
-                        )
+
+                        Row(
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 15.dp)
+                        ) {
+                            StatBox(
+                                label = "Zbroja",
+                                value = characterStats.armorClass?.toString() ?: "?"
+                            )
+                            StatBox(
+                                label = "Incjatywa",
+                                value = if (characterStats.initiative != null) "+" + characterStats.initiative else "?"
+                            )
+                            StatBox(
+                                label = "Szybkość",
+                                value = if (characterRace != null) characterRace!!.speed.toString() else "?"
+                            )
+                        }
+
+                        StatsGenerator(characterStats)
                     }
                 }
             }
         }
+    }
+}
+
+@Composable
+fun StatsGenerator(characterStats: CharacterStats) {
+    val generatorStarted by remember { mutableStateOf(true) }
+
+    if (characterStats.allNotNull()) return
+
+    if (!generatorStarted) {
+        return
+    }
+
+    val randomD20 = Random.nextInt(1, 21)
+
+    Column(
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.fillMaxSize().offset(0.dp, (-15).dp)
+    ) {
+        Text(
+            "Przeciągnij poniższą liczbę do jednej ze statystyk po lewej",
+            textAlign = TextAlign.Center,
+            modifier = Modifier.padding(bottom = 15.dp)
+        )
+        DraggableStatBoxWithChip("", randomD20)
     }
 }
