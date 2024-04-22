@@ -26,6 +26,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -118,9 +119,14 @@ fun NewCharacterView() {
 
     @Composable
     fun startGeneratorFAB() {
+        if (characterRace == null) return
         FloatingActionButton(onClick = { generatorStarted = true }) {
             Icon(imageVector = Icons.Outlined.Casino, contentDescription = "Losuj")
         }
+    }
+
+    LaunchedEffect(characterRace) {
+        characterStats = CharacterStats()
     }
 
     Scaffold(
@@ -163,7 +169,7 @@ fun NewCharacterView() {
                         .padding(top = 10.dp)
                         .height(IntrinsicSize.Min)
                 ) {
-                    Stats(characterStats, setCharacterStats = { characterStats = it })
+                    Stats(characterStats, setCharacterStats = { characterStats = it }, race = characterRace)
 
                     Column(
                         verticalArrangement = Arrangement.spacedBy(10.dp),
@@ -204,7 +210,7 @@ fun NewCharacterView() {
                             )
                         }
 
-                        StatsGenerator(characterStats, generatorStarted)
+                        StatsGenerator(characterStats, characterRace, generatorStarted)
                     }
                 }
             }
@@ -214,10 +220,11 @@ fun NewCharacterView() {
 
 @Composable
 fun StatsGenerator(
-    characterStats: CharacterStats,
+    stats: CharacterStats,
+    race: CharacterRace?,
     generatorStarted: Boolean
 ) {
-    if (characterStats.allNotNull() || !generatorStarted) return
+    if (stats.allNotNull() || !generatorStarted || race == null) return
 
     Column(
         verticalArrangement = Arrangement.Center,
@@ -227,6 +234,7 @@ fun StatsGenerator(
             .offset(0.dp, (-15).dp)
     ) {
         val randomD20 = Random.nextInt(1, 21)
+
         Text(
             "Przeciągnij poniższą liczbę do jednej ze statystyk po lewej",
             textAlign = TextAlign.Center,

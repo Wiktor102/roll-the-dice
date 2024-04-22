@@ -32,6 +32,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.rollthedice.characters.CharacterRace
 import com.example.rollthedice.characters.CharacterStats
 import com.example.rollthedice.utilities.DragTarget
 import com.example.rollthedice.utilities.DropTarget
@@ -41,7 +42,8 @@ import com.example.rollthedice.utilities.conditional
 @Composable
 fun Stats(
     characterStats: CharacterStats,
-    setCharacterStats: ((cs: CharacterStats) -> Unit)? = null
+    setCharacterStats: ((cs: CharacterStats) -> Unit)? = null,
+    race: CharacterRace? = null
 ) {
     fun setValue(characterStats: CharacterStats) {
         if (setCharacterStats == null) return
@@ -55,32 +57,38 @@ fun Stats(
         DroppableStatBoxWithChip(
             label = "siła",
             setValue = { setValue(characterStats.copy(strength = it)) },
-            chipValue = characterStats.strength
+            chipValue = characterStats.strength,
+            race = race
         )
         DroppableStatBoxWithChip(
             label = "zwinność",
             setValue = { setValue(characterStats.copy(dexterity = it)) },
-            chipValue = characterStats.dexterity
+            chipValue = characterStats.dexterity,
+            race = race
         )
         DroppableStatBoxWithChip(
-            label = "budowa?",
+            label = "budowa",
             setValue = { setValue(characterStats.copy(constitution = it)) },
-            chipValue = characterStats.constitution
+            chipValue = characterStats.constitution,
+            race = race
         )
         DroppableStatBoxWithChip(
             label = "inteligencja",
             setValue = { setValue(characterStats.copy(intelligence = it)) },
-            chipValue = characterStats.intelligence
+            chipValue = characterStats.intelligence,
+            race = race
         )
         DroppableStatBoxWithChip(
             label = "wiedza",
             setValue = { setValue(characterStats.copy(wisdom = it)) },
-            chipValue = characterStats.wisdom
+            chipValue = characterStats.wisdom,
+            race = race
         )
         DroppableStatBoxWithChip(
             label = "charyzma",
             setValue = { setValue(characterStats.copy(charisma = it)) },
-            chipValue = characterStats.charisma
+            chipValue = characterStats.charisma,
+            race = race
         )
     }
 }
@@ -204,7 +212,7 @@ fun DraggableStatBoxWithChip(label: String, chipValue: Int, modifier: Modifier =
 }
 
 @Composable
-fun DroppableStatBoxWithChip(label: String, chipValue: Int?, setValue: (value: Int) -> Unit) {
+fun DroppableStatBoxWithChip(label: String, chipValue: Int?, setValue: (value: Int) -> Unit, race: CharacterRace?) {
     DropTarget<Int>(modifier = Modifier)
     { isInBound, droppedData ->
         var value by remember { mutableStateOf(chipValue) }
@@ -215,7 +223,42 @@ fun DroppableStatBoxWithChip(label: String, chipValue: Int?, setValue: (value: I
             LocalDragTargetInfo.current.itemDropped = true
             LocalDragTargetInfo.current.dataToDrop = null
             value = droppedData
-            setValue(droppedData)
+
+            when (race) {
+                CharacterRace.HUMAN -> {
+                    value = value!! + 1
+                }
+                CharacterRace.DWARF -> {
+                    if (label == "budowa") value = value!! + 2
+                }
+                CharacterRace.ELF -> {
+                    if (label == "zwinność") value = value!! + 2
+                }
+                CharacterRace.HALF_ELF -> {
+                    if (label == "charyzma") value = value!! + 2 /* TODO */
+                }
+                CharacterRace.HALFLING -> {
+                    if (label == "zwinność") value = value!! + 2
+                }
+                CharacterRace.GNOME -> {
+                    if (label == "inteligencja") value = value!! + 2
+                }
+                CharacterRace.DRAGONBORN -> {
+                    if (label == "siła") value = value!! + 2
+                    if (label == "charyzma") value = value!! + 1
+                }
+                CharacterRace.HALF_ORC -> {
+                    if (label == "siła") value = value!! + 2
+                    if (label == "budowa") value = value!! + 1
+                }
+                CharacterRace.TIEFLING -> {
+                    if (label == "charyzma") value = value!! + 2
+                    if (label == "inteligencja") value = value!! + 1
+                }
+                else -> {}
+            }
+
+            setValue(value!!)
         }
 
         Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
