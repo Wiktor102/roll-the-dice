@@ -1,5 +1,7 @@
 package com.example.rollthedice.characters
 
+import android.util.Log
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
@@ -11,18 +13,26 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.outlined.Casino
 import androidx.compose.material.icons.outlined.Done
+import androidx.compose.material.icons.outlined.Warning
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.ListItem
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -36,11 +46,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.get
@@ -112,7 +125,7 @@ fun NewCharacterView() {
     @Composable
     fun doneFAB() {
         if (!characterStats.allNotNull()) return
-        FloatingActionButton( onClick = ::submit) {
+        FloatingActionButton(onClick = ::submit) {
             Icon(imageVector = Icons.Outlined.Done, contentDescription = "Zakończ")
         }
     }
@@ -127,6 +140,10 @@ fun NewCharacterView() {
 
     LaunchedEffect(characterRace) {
         characterStats = CharacterStats()
+    }
+
+    if (characterRace == CharacterRace.HALF_ELF) {
+        HalfElfDialog(characterStats) { characterStats = it }
     }
 
     Scaffold(
@@ -169,7 +186,11 @@ fun NewCharacterView() {
                         .padding(top = 10.dp)
                         .height(IntrinsicSize.Min)
                 ) {
-                    Stats(characterStats, setCharacterStats = { characterStats = it }, race = characterRace)
+                    Stats(
+                        characterStats,
+                        setCharacterStats = { characterStats = it },
+                        race = characterRace
+                    )
 
                     Column(
                         verticalArrangement = Arrangement.spacedBy(10.dp),
@@ -241,5 +262,80 @@ fun StatsGenerator(
             modifier = Modifier.padding(bottom = 15.dp)
         )
         DraggableStatBoxWithChip("", randomD20)
+    }
+}
+
+typealias CharacterStatsFunction = (CharacterStats) -> CharacterStats
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun HalfElfDialog(characterStats: CharacterStats, setCharacterStats: (nv: CharacterStats) -> Unit) {
+    var dialogOpen by remember { mutableStateOf(false) }
+    var dialogWasOpened by remember { mutableStateOf(false) }
+    var selected by remember { mutableStateOf(listOf<String>()) }
+
+    if (characterStats.allNotNull()) {
+        dialogOpen = true
+    }
+
+    val map = mapOf<String, CharacterStatsFunction>(
+        "siła" to { s -> s.copy(strength = s.strength!! + 1) },
+        "zwinność" to { s -> s.copy(dexterity = s.dexterity!! + 1) },
+        "budowa" to { s -> s.copy(constitution = s.constitution!! + 1) },
+        "inteligencja" to { s -> s.copy(intelligence = s.intelligence!! + 1) },
+        "wiedza" to { s -> s.copy(wisdom = s.wisdom!! + 1) },
+        "charyzma" to { s -> s.copy(charisma = s.charisma!! + 1) }
+    )
+
+    if (!dialogOpen || dialogWasOpened) return
+    AlertDialog(
+        onDismissRequest = { dialogOpen = false },
+        properties = DialogProperties(dismissOnBackPress = false, dismissOnClickOutside = false)
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier
+                .clip(RoundedCornerShape(28.dp))
+                .background(MaterialTheme.colorScheme.surface)
+                .padding(24.dp)
+        ) {
+            Icon(imageVector = Icons.Outlined.Warning, contentDescription = "Ostrzeżenie")
+            Text(
+                "Dodatkowe umiejętności",
+                style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier.padding(bottom = 16.dp)
+            )
+            Divider()
+            map.keys.map {
+                ListItem(
+                    headlineContent = { Text(it) },
+                    leadingContent = {
+                        Checkbox(
+                            checked = selected.contains(it),
+                            onCheckedChange = { o ->
+                                selected = if (o) {
+                                    selected + it
+                                } else {
+                                    val ml = selected.toMutableList()
+                                    ml.remove(it)
+                                    ml
+                                }
+                            },
+                            enabled = selected.size < 2
+                        )
+                    }
+                )
+            }
+            Divider()
+            TextButton(
+                onClick = {
+                    setCharacterStats(map[selected[1]]!!(map[selected[0]]!!(characterStats)))
+                    dialogOpen = false
+                    dialogWasOpened = true
+                },
+                enabled = selected.size == 2
+            ) {
+                Text("Potwierdź")
+            }
+        }
     }
 }

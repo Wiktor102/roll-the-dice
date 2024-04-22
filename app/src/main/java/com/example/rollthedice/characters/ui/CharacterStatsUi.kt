@@ -1,5 +1,6 @@
 package com.example.rollthedice.characters.ui
 
+import android.util.Log
 import androidx.compose.animation.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
@@ -218,6 +219,10 @@ fun DroppableStatBoxWithChip(label: String, chipValue: Int?, setValue: (value: I
         var value by remember { mutableStateOf(chipValue) }
         var style = if (value == null) StatBoxWithChipStyle.OUTLINED else StatBoxWithChipStyle.DEFAULT
         if (!LocalDragTargetInfo.current.itemDropped && isInBound && value == null) style = StatBoxWithChipStyle.OUTLINED_ACTIVE
+
+        LaunchedEffect(chipValue) {
+            value = chipValue
+        }
 
         if (!LocalDragTargetInfo.current.itemDropped && isInBound && droppedData != null && value == null) {
             LocalDragTargetInfo.current.itemDropped = true
