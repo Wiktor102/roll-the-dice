@@ -57,7 +57,7 @@ class RollHistoryViewModel : ViewModel() {
         val sharedPref = MainActivity.appContext.getSharedPreferences("roll-the-dice", Context.MODE_PRIVATE)
         val jsonString = sharedPref.getString("roll-history", null)
 
-        if (jsonString != null) {
+        if (jsonString != null && jsonString != "") {
             val gson = Gson()
             val parsed: List<Roll> = jsonString.split(";").map { gson.fromJson(it, Roll::class.java) }
             _rolls.value = parsed

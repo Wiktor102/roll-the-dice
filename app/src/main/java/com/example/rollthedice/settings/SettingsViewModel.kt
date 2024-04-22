@@ -49,7 +49,7 @@ class SettingsViewModel:ViewModel() {
         val sharedPref = MainActivity.appContext.getSharedPreferences("roll-the-dice", Context.MODE_PRIVATE)
         val jsonString = sharedPref.getString("settings", null)
 
-        if (jsonString != null) {
+        if (jsonString != null && jsonString != "") {
             val settingsAsMap = Gson().fromJson(jsonString, Map::class.java)
             _theme.value = settingsAsMap["theme"] as String? ?: "auto"
             _vibrations.value = settingsAsMap["vibrations"] as Boolean? ?: true

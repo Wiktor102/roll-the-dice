@@ -143,7 +143,7 @@ class CharacterViewModel() : ViewModel() {
         val sharedPref = MainActivity.appContext.getSharedPreferences("roll-the-dice", Context.MODE_PRIVATE)
         val jsonString = sharedPref.getString("characters", null)
 
-        if (jsonString != null) {
+        if (jsonString != null && jsonString != "") {
             val gson = Gson()
             val parsed: List<Character> = jsonString.split(";").map { gson.fromJson(it, Character::class.java) }
             _characters.value = parsed
